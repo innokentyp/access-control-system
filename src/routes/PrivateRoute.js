@@ -9,4 +9,4 @@ const PrivateRoute = ({ authenticated, component: Component, ...rest }) => (
 	/>
 )
 
-export default connect(state => ({ authenticated: state.authentication.is }))(PrivateRoute)
+export default connect(state => ({ authenticated: !!state.authentication.user.jwt }))(PrivateRoute)

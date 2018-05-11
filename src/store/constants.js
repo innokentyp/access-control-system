@@ -1,4 +1,8 @@
 export const REQUEST_DATA = 'REQUEST_DATA'
 
-export const LOGGED_IN = 'LOGGED_IN'
-export const LOGGED_OUT = 'LOGGED_OUT'
+export const LOGIN = 'LOGIN'
+
+export const LOGIN_SUCCEEDED = 'LOGIN_SUCCEEDED'
+export const LOGIN_FAILED = 'LOGIN_FAILED'
+
+export const LOGOUT = 'LOGOUT'

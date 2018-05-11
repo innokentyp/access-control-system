@@ -1,23 +1,31 @@
 import { combineReducers } from 'redux'
 
 import { 
-  LOGGED_IN, 
-  LOGGED_OUT
+  LOGIN,
+
+  LOGIN_SUCCEEDED, 
+  LOGIN_FAILED,
+
+  LOGOUT
 } from './constants'
 
 export const preloadedState = {
   authentication: {
-    is: false,
+    message: '',
     user: {}
   }
 }
 
 function authentication(state = preloadedState.authentication, action) {
   switch (action.type) {
-    case LOGGED_IN:
-      return { ...state, is: true, user: { ...action.user, logged: new Date() } }
-    case LOGGED_OUT:
-      return { ...state, is: false, user: {} }  
+    case LOGIN:
+      return { ...state, message: '' }
+    case LOGIN_SUCCEEDED:
+      return { ...state, message: '', user: { ...action.user } }
+    case LOGIN_FAILED:
+      return { ...state, message: action.message }
+    case LOGOUT:
+      return { ...state, user: {} }  
     default:
       return state 
   }

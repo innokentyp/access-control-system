@@ -1,17 +1,35 @@
 import { 
-  LOGGED_IN, 
-  LOGGED_OUT
+	LOGIN,
+
+  LOGIN_SUCCEEDED, 
+  LOGIN_FAILED,
+
+  LOGOUT
 } from './constants'
 
-export function loggedIn(user) {
+export function login(credentials) {
 	return {
-		type: LOGGED_IN,
+		type: LOGIN,
+		credentials
+	}
+}
+
+export function loginSucceeded(user) {
+	return {
+		type: LOGIN_SUCCEEDED,
 		user
 	}
 }
 
-export function loggedOut() {
+export function loginFailed(message) {
 	return {
-		type: LOGGED_OUT
+		type: LOGIN_FAILED,
+		message
+	}
+}
+
+export function logout() {
+	return {
+		type: LOGOUT
 	}
 }

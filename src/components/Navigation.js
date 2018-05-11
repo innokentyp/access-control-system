@@ -4,12 +4,12 @@ import { connect } from 'react-redux'
 
 import { Menu, Icon, Button } from 'semantic-ui-react'
 
-import { loggedOut } from '../store/actions'
+import { logout } from '../store/actions'
 
 class Navigation extends Component {
 	buttonLogoutClick = (e) => {
 		if (window.confirm('Выйти из системы?')) {
-			this.props.loggedOut()
+			this.props.logout()
 
 			this.props.history.push('/')
 		}
@@ -60,4 +60,4 @@ class Navigation extends Component {
 	}	
 } 
 
-export default withRouter(connect(state => ({ authenticated: state.authentication.is }), dispatch => ({ loggedOut: () => { dispatch(loggedOut()) } }) )(Navigation))
+export default withRouter(connect(state => ({ authenticated: !!state.authentication.user.jwt }), dispatch => ({ logout: () => { dispatch(logout()) } }) )(Navigation))
