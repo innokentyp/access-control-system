@@ -51,7 +51,7 @@ class Navigation extends Component {
         			?
 	          	<Button onClick={this.buttonLogoutClick} primary>Logout</Button>
 	          	:
-	          	<Button as={Link} to={{ pathname: '/login', state: { from: this.props.location } }} primary>Login</Button>
+	          	<Button as={Link} to={{ pathname: '/login', state: { from: this.props.location } }} primary disabled={!!pathname.match(new RegExp('^/login'))}>Login</Button>
         		}
         	</Menu.Item>
         </Menu.Menu>

@@ -5,13 +5,15 @@ import {
 
   LOGIN_SUCCEEDED, 
   LOGIN_FAILED,
+  LOGIN_RESET,
 
   LOGOUT
 } from './constants'
 
 export const preloadedState = {
   authentication: {
-    message: '',
+    loading: false,
+    error: {},
     user: {}
   }
 }
@@ -19,11 +21,13 @@ export const preloadedState = {
 function authentication(state = preloadedState.authentication, action) {
   switch (action.type) {
     case LOGIN:
-      return { ...state, message: '' }
+      return { ...state, loading: true, error: {} }
     case LOGIN_SUCCEEDED:
-      return { ...state, message: '', user: { ...action.user } }
+      return { ...state, loading: false, error: {}, user: { ...action.user } }
     case LOGIN_FAILED:
-      return { ...state, message: action.message }
+      return { ...state, loading: false, error: { ...action.error } }
+    case LOGIN_RESET:
+      return { ...state, error: {} }
     case LOGOUT:
       return { ...state, user: {} }  
     default:

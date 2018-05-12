@@ -3,6 +3,7 @@ import {
 
   LOGIN_SUCCEEDED, 
   LOGIN_FAILED,
+  LOGIN_RESET,
 
   LOGOUT
 } from './constants'
@@ -21,10 +22,16 @@ export function loginSucceeded(user) {
 	}
 }
 
-export function loginFailed(message) {
+export function loginFailed(error) {
 	return {
 		type: LOGIN_FAILED,
-		message
+		error
+	}
+}
+
+export function loginReset() {
+	return {
+		type: LOGIN_RESET
 	}
 }
 
