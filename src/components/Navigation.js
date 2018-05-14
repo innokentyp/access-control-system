@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import { Link, withRouter } from 'react-router-dom'
+import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import { Menu, Icon, Button } from 'semantic-ui-react'
 
-import { logout } from '../store/actions'
+import * as actions from '../store/actions/authentication'
 
 class Navigation extends Component {
 	buttonLogoutClick = (e) => {
 		if (window.confirm('Выйти из системы?')) {
-			this.props.logout()
+			this.props.actions.logout()
 
 			this.props.history.push('/')
 		}
@@ -44,6 +45,14 @@ class Navigation extends Component {
           Архив
         </Menu.Item>
 
+        <Menu.Item
+          as={Link} 
+        	to="/personal"
+          active={!!pathname.match(new RegExp('^/personal'))}
+        >
+          Персонал
+        </Menu.Item>
+
         <Menu.Menu position='right'>
         	<Menu.Item>
         		{
@@ -60,4 +69,17 @@ class Navigation extends Component {
 	}	
 } 
 
-export default withRouter(connect(state => ({ authenticated: !!state.authentication.user.jwt }), dispatch => ({ logout: () => { dispatch(logout()) } }) )(Navigation))
+export default withRouter(
+  connect(
+    state => (
+      { 
+        authenticated: !!state.authentication.user.jwt 
+      }
+    ), 
+    dispatch => (
+      { 
+        actions: bindActionCreators(actions, dispatch)      
+      }
+    ) 
+  )(Navigation)
+)

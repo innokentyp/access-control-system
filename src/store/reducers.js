@@ -2,32 +2,30 @@ import { combineReducers } from 'redux'
 
 import { 
   LOGIN,
+  LOGIN_SUCCEEDED,
+  LOGOUT,
 
-  LOGIN_SUCCEEDED, 
-  LOGIN_FAILED,
-  LOGIN_RESET,
-
-  LOGOUT
+  REQUEST_SUBJECTS,
+  SET_SUBJECTS
 } from './constants'
 
 export const preloadedState = {
   authentication: {
-    loading: false,
-    error: {},
     user: {}
-  }
+  },
+
+  subjects: {
+    sort: 'name',
+    items: {}
+  } 
 }
 
 function authentication(state = preloadedState.authentication, action) {
   switch (action.type) {
     case LOGIN:
-      return { ...state, loading: true, error: {} }
+      return { ...state }
     case LOGIN_SUCCEEDED:
-      return { ...state, loading: false, error: {}, user: { ...action.user } }
-    case LOGIN_FAILED:
-      return { ...state, loading: false, error: { ...action.error } }
-    case LOGIN_RESET:
-      return { ...state, error: {} }
+      return { ...state, user: { ...action.user } }
     case LOGOUT:
       return { ...state, user: {} }  
     default:
@@ -35,4 +33,15 @@ function authentication(state = preloadedState.authentication, action) {
   }
 }
 
-export default combineReducers({ authentication })
+function subjects(state = preloadedState.subjects, action) {
+  switch (action.type) {
+    case REQUEST_SUBJECTS:
+      return { ...state, items: {} }
+    case SET_SUBJECTS:
+      return { ...state, items: { ...action.items } }
+    default:
+      return state 
+  }
+}
+
+export default combineReducers({ authentication, subjects })

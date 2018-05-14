@@ -10,6 +10,7 @@ import PrivateRoute from './routes/PrivateRoute'
 import Home from './views/Home'
 import Passages from './views/Passages'
 import Archive from './views/Archive'
+import Personal from './views/Personal'
 
 import Login from './views/Login'
 import NoMatch from './views/NoMatch'
@@ -25,6 +26,7 @@ class App extends Component {
           
           <PrivateRoute path='/passages' component={Passages} />
           <PrivateRoute path='/archive' component={Archive} />
+          <PrivateRoute path='/personal' component={Personal} />
 
           <Route path='/login' exact component={Login} />
           <Route component={NoMatch} />
