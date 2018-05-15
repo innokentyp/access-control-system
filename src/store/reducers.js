@@ -15,8 +15,8 @@ export const preloadedState = {
   },
 
   subjects: {
-    sort: 'name',
-    items: {}
+    sorting: 'name',
+    items: []
   } 
 }
 
@@ -25,8 +25,12 @@ function authentication(state = preloadedState.authentication, action) {
     case LOGIN:
       return { ...state }
     case LOGIN_SUCCEEDED:
+      window.sessionStorage.setItem('jwt', action.user.jwt)
+
       return { ...state, user: { ...action.user } }
     case LOGOUT:
+      window.sessionStorage.removeItem('jwt')
+
       return { ...state, user: {} }  
     default:
       return state 
@@ -36,9 +40,9 @@ function authentication(state = preloadedState.authentication, action) {
 function subjects(state = preloadedState.subjects, action) {
   switch (action.type) {
     case REQUEST_SUBJECTS:
-      return { ...state, items: {} }
+      return { ...state, items: [] }
     case SET_SUBJECTS:
-      return { ...state, items: { ...action.items } }
+      return { ...state, items: [ ...action.items ] }
     default:
       return state 
   }

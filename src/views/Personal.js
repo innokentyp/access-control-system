@@ -5,10 +5,11 @@ import { connect } from 'react-redux'
 import { Container } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/subjects'
+import { selectAllSubjects } from '../store/selectors/subjects'
 
 class Personal extends Component {
 	componentDidMount() {
-		if (Object.keys(this.props.subjects).length === 0) {
+		if (this.props.subjects.length === 0) {
 
 			this.props.actions.requestSubjects()
 		}
@@ -21,9 +22,9 @@ class Personal extends Component {
 
 				<ul>
 					{
-						Object.values(this.props.subjects).map(
+						this.props.subjects.map(
 							(item, i) => (
-								<li key={item.id}>{item.name}</li>
+								<li key={item.id}>{item.name} / id: {item.id} / создан: {item.created_at.toLocaleString('ru-RU')} / изменен: {item.updated_at.toLocaleString('ru-RU')}</li>
 							)	
 						)
 					}
@@ -36,7 +37,7 @@ class Personal extends Component {
 export default connect(
 	state => (
 		{ 
-			subjects: state.subjects.items
+			subjects: selectAllSubjects(state)
 		}
 	), 
 	dispatch => (

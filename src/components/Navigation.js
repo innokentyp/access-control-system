@@ -3,12 +3,16 @@ import { Link, withRouter } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { Menu, Icon, Button } from 'semantic-ui-react'
+import { Menu, Icon, Dropdown } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/authentication'
 
 class Navigation extends Component {
-	buttonLogoutClick = (e) => {
+  state = {
+    colors: ['red', 'orange', 'yellow', 'olive', 'green', 'teal', 'blue', 'violet', 'purple', 'pink', 'brown', 'grey']
+  }
+
+	logoutClick = (e) => {
 		if (window.confirm('Выйти из системы?')) {
 			this.props.actions.logout()
 
@@ -18,6 +22,10 @@ class Navigation extends Component {
 
 	render() {
 		var { pathname } = this.props.location
+    var { colors } = this.state
+    var { user } = this.props
+
+    console.log(pathname)
 
 		return (
 			<Menu as="nav" fixed="top" stackable>
@@ -25,14 +33,16 @@ class Navigation extends Component {
         	as={Link} 
         	to="/"
           active={pathname === '/'}
+          color={colors[0]}
         >
-          <Icon name="eye" />ACS
+          <Icon name="home" />ACS  
         </Menu.Item>
 
         <Menu.Item
           as={Link} 
         	to="/passages"
           active={!!pathname.match(new RegExp('^/passages'))}
+          color={colors[1]}
         >
           Мониторинг
         </Menu.Item>
@@ -41,6 +51,7 @@ class Navigation extends Component {
           as={Link} 
         	to="/archive"
           active={!!pathname.match(new RegExp('^/archive'))}
+          color={colors[2]}
         >
           Архив
         </Menu.Item>
@@ -49,20 +60,34 @@ class Navigation extends Component {
           as={Link} 
         	to="/personal"
           active={!!pathname.match(new RegExp('^/personal'))}
+          color={colors[3]}
         >
           Персонал
         </Menu.Item>
 
         <Menu.Menu position='right'>
-        	<Menu.Item>
-        		{
-        			this.props.authenticated
-        			?
-	          	<Button onClick={this.buttonLogoutClick} primary>Logout</Button>
-	          	:
-	          	<Button as={Link} to={{ pathname: '/login', state: { from: this.props.location } }} primary disabled={!!pathname.match(new RegExp('^/login'))}>Login</Button>
-        		}
-        	</Menu.Item>
+          {
+      			user.jwt
+      			?
+          	<Dropdown item text={`[ ${user.name.slice(0, 1).toUpperCase()}${user.name.slice(1)} ]`}>
+              <Dropdown.Menu>
+                <Dropdown.Item text='Персональные данные' />
+                <Dropdown.Item text='Журнал' />
+                <Dropdown.Item text='Настройка' />
+                <Dropdown.Item text='Конфиденциальность' />
+                <Dropdown.Divider />
+                <Dropdown.Item text='Выйти' onClick={this.logoutClick} />
+              </Dropdown.Menu>
+            </Dropdown>
+          	:
+            <Menu.Item 
+              as={Link} 
+              to={{ pathname: '/login', state: { from: this.props.location } }}
+              active={!!pathname.match(new RegExp('^/login'))}
+            >
+              Login
+            </Menu.Item>          	
+      		}
         </Menu.Menu>
       </Menu>
     )
@@ -73,7 +98,7 @@ export default withRouter(
   connect(
     state => (
       { 
-        authenticated: !!state.authentication.user.jwt 
+        user: state.authentication.user
       }
     ), 
     dispatch => (

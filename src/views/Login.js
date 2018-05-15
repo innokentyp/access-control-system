@@ -56,9 +56,9 @@ class Login extends Component {
 			this.props.actions.login({ name: e.target.user.value, password: e.target.password.value, remember: e.target.remember.checked })
 				.then (
 					() => {
-						let { history, location } = this.props
+						var { history, location } = this.props
 
-						location.state ? history.push(location.state.from.pathname === location.pathname ? '/' : location.state.from.pathname) : history.push('/')
+						location.state ? history.replace(location.state.from.pathname === location.pathname ? '/' : location.state.from.pathname) : history.replace('/')
 					}
 				)
 				.catch (
