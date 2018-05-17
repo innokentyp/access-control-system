@@ -58,12 +58,49 @@ class Navigation extends Component {
 
         <Menu.Item
           as={Link} 
+          to="/structure"
+          active={!!pathname.match(new RegExp('^/structure'))}
+          color={colors[3]}
+        >
+          Офис
+        </Menu.Item>
+
+        <Menu.Item
+          as={Link} 
         	to="/personal"
           active={!!pathname.match(new RegExp('^/personal'))}
-          color={colors[3]}
+          color={colors[4]}
         >
           Персонал
         </Menu.Item>
+
+        <Menu.Item
+          as={Link} 
+          to="/access"
+          active={!!pathname.match(new RegExp('^/access'))}
+          color={colors[5]}
+        >
+          Сценарий
+        </Menu.Item>
+
+        <Menu.Item
+          as={Link} 
+          to="/accounting"
+          active={!!pathname.match(new RegExp('^/accounting'))}
+          color={colors[6]}
+        >
+          Учет
+        </Menu.Item>
+
+        <Menu.Item
+          as={Link} 
+          to="/security"
+          active={!!pathname.match(new RegExp('^/security'))}
+          color={colors[7]}
+        >
+          Безопасность
+        </Menu.Item>
+
 
         <Menu.Menu position='right'>
           {

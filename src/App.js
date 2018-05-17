@@ -5,12 +5,17 @@ import { Route, Switch } from 'react-router-dom'
 //import './App.css'
 
 import Navigation from './components/Navigation'
+
 import PrivateRoute from './routes/PrivateRoute'
 
 import Home from './views/Home'
 import Passages from './views/Passages'
 import Archive from './views/Archive'
+import Structure from './views/Structure'
 import Personal from './views/Personal'
+import Access from './views/Access'
+import Accounting from './views/Accounting'
+import Security from './views/Security'
 
 import Login from './views/Login'
 import NoMatch from './views/NoMatch'
@@ -26,7 +31,11 @@ class App extends Component {
           
           <PrivateRoute path='/passages' component={Passages} />
           <PrivateRoute path='/archive' component={Archive} />
+          <PrivateRoute path='/structure' component={Structure} />
           <PrivateRoute path='/personal' component={Personal} />
+          <PrivateRoute path='/access' component={Access} />
+          <PrivateRoute path='/accounting' component={Accounting} />
+          <PrivateRoute path='/security' component={Security} />
 
           <Route path='/login' exact component={Login} />
           <Route component={NoMatch} />

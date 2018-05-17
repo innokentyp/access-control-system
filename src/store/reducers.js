@@ -5,6 +5,7 @@ import {
   LOGIN_SUCCEEDED,
   LOGOUT,
 
+  SET_SORTING,
   REQUEST_SUBJECTS,
   SET_SUBJECTS
 } from './constants'
@@ -39,6 +40,8 @@ function authentication(state = preloadedState.authentication, action) {
 
 function subjects(state = preloadedState.subjects, action) {
   switch (action.type) {
+    case SET_SORTING: 
+      return { ...state, sorting: action.sorting }
     case REQUEST_SUBJECTS:
       return { ...state, items: [] }
     case SET_SUBJECTS:
