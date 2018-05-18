@@ -4,10 +4,13 @@ import {
   LOGIN,
   LOGIN_SUCCEEDED,
   LOGOUT,
+  
+  REQUEST_SUBJECTS,
+  SET_SUBJECTS,
 
   SET_SORTING,
-  REQUEST_SUBJECTS,
-  SET_SUBJECTS
+  SET_NUMBER_PER_PAGE,
+  SET_ACTIVE_PAGE
 } from './constants'
 
 export const preloadedState = {
@@ -16,8 +19,12 @@ export const preloadedState = {
   },
 
   subjects: {
-    sorting: 'name',
-    items: []
+    items: [],
+
+    sorting: '',
+  
+    numberPerPage: 10,
+    activePage: 1
   } 
 }
 
@@ -39,13 +46,19 @@ function authentication(state = preloadedState.authentication, action) {
 }
 
 function subjects(state = preloadedState.subjects, action) {
-  switch (action.type) {
-    case SET_SORTING: 
-      return { ...state, sorting: action.sorting }
+  switch (action.type) {    
     case REQUEST_SUBJECTS:
-      return { ...state, items: [] }
+      return state
     case SET_SUBJECTS:
-      return { ...state, items: [ ...action.items ] }
+      return { ...state, items: [ ...action.items ], activePage: 1 }
+
+    case SET_SORTING: 
+      return { ...state, sorting: action.sorting }  
+    case SET_NUMBER_PER_PAGE: 
+      return { ...state, numberPerPage: action.numberPerPage }  
+    case SET_ACTIVE_PAGE: 
+      return { ...state, activePage: action.activePage }  
+  
     default:
       return state 
   }

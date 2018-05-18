@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect'
 
 export const selectAllSubjects = createSelector(
-	[ state => state.subjects.sorting, state => state.subjects.items ],
-	(sorting, subjects) => {
+	[ state => state.subjects.items, state => state.subjects.sorting ],
+	(subjects, sorting) => {
 		var items = subjects.map((item, i) => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
 
 		if (sorting) {
@@ -28,3 +28,17 @@ export const selectAllSubjects = createSelector(
 		return items
 	}
 )
+
+export const selectTotalPages = createSelector(
+	[ state => state.subjects.items.length, state => state.subjects.numberPerPage ],
+	(count, numberPerPage) => Math.ceil(count / numberPerPage)	
+)
+
+export const selectActivePageSubjects = createSelector(
+	[ selectAllSubjects, state => ({ numberPerPage: state.subjects.numberPerPage, activePage: state.subjects.activePage }) ],
+	(subjects, { numberPerPage, activePage }) => {
+		const start = (activePage - 1) * numberPerPage
+
+		return subjects.slice(start, start + numberPerPage)
+	}
+) 
