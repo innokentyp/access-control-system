@@ -8,6 +8,7 @@ import {
   REQUEST_SUBJECTS,
   SET_SUBJECTS,
 
+  SET_FILTERING,
   SET_SORTING,
   SET_NUMBER_PER_PAGE,
   SET_ACTIVE_PAGE
@@ -21,9 +22,10 @@ export const preloadedState = {
   subjects: {
     items: [],
 
+    filtering: '',
     sorting: '',
   
-    numberPerPage: 10,
+    numberPerPage: 12,
     activePage: 1
   } 
 }
@@ -52,10 +54,12 @@ function subjects(state = preloadedState.subjects, action) {
     case SET_SUBJECTS:
       return { ...state, items: [ ...action.items ], activePage: 1 }
 
+    case SET_FILTERING: 
+      return { ...state, filtering: action.filtering, activePage: 1 }  
     case SET_SORTING: 
       return { ...state, sorting: action.sorting }  
     case SET_NUMBER_PER_PAGE: 
-      return { ...state, numberPerPage: action.numberPerPage }  
+      return { ...state, numberPerPage: action.numberPerPage, activePage: 1 }  
     case SET_ACTIVE_PAGE: 
       return { ...state, activePage: action.activePage }  
   

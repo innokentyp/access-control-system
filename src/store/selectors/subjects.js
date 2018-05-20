@@ -1,11 +1,41 @@
 import { createSelector } from 'reselect'
 
 export const selectAllSubjects = createSelector(
-	[ state => state.subjects.items, state => state.subjects.sorting ],
-	(subjects, sorting) => {
-		var items = subjects.map((item, i) => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
+	state => state.subjects.items,
+	subjects => {
+		console.log('selectAllSubjects')
 
+		return subjects.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
+	}
+)
+
+export const selectFilteringSubjects = createSelector(
+	[ selectAllSubjects, state => state.subjects.filtering ],
+	(subjects, filtering) => {
+		console.log('selectFilteringSubjects')
+
+		if (filtering) {
+			try {
+				let r = new RegExp(filtering)
+
+				return subjects.filter(item => r.test(item.name))
+			} catch (e) {
+				console.log(e.message)
+			}
+		}
+
+		return subjects
+	}
+)
+
+export const selectSortingSubjects = createSelector(
+	[ selectFilteringSubjects, state => state.subjects.sorting ],
+	(subjects, sorting) => {
+		console.log('selectSortingSubjects')
+		
 		if (sorting) {
+			let items = subjects
+
 			items.sort(
 				(a, b) => {
 					switch (sorting) {
@@ -23,22 +53,10 @@ export const selectAllSubjects = createSelector(
 					}
 				}
 			)
+
+			return items
 		}
 
-		return items
-	}
+		return subjects
+	}	
 )
-
-export const selectTotalPages = createSelector(
-	[ state => state.subjects.items.length, state => state.subjects.numberPerPage ],
-	(count, numberPerPage) => Math.ceil(count / numberPerPage)	
-)
-
-export const selectActivePageSubjects = createSelector(
-	[ selectAllSubjects, state => ({ numberPerPage: state.subjects.numberPerPage, activePage: state.subjects.activePage }) ],
-	(subjects, { numberPerPage, activePage }) => {
-		const start = (activePage - 1) * numberPerPage
-
-		return subjects.slice(start, start + numberPerPage)
-	}
-) 

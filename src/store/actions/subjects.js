@@ -1,6 +1,7 @@
 import {
 	REQUEST_SUBJECTS,
   SET_SUBJECTS,
+  SET_FILTERING,
   SET_SORTING,
   SET_NUMBER_PER_PAGE,
   SET_ACTIVE_PAGE
@@ -16,6 +17,13 @@ export function setSubjects(items) {
 	return {
 		type: SET_SUBJECTS,
 		items
+	}
+}
+
+export function setFiltering(filtering) {
+	return {
+		type: SET_FILTERING,
+		filtering
 	}
 }
 

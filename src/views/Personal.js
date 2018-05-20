@@ -4,10 +4,10 @@ import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { Container, Menu, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
+import { Container, Menu, Input, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/subjects'
-import { selectTotalPages, selectActivePageSubjects } from '../store/selectors/subjects'
+import { selectSortingSubjects } from '../store/selectors/subjects'
 
 class Personal extends Component {
 	sortingOptions = [
@@ -19,10 +19,13 @@ class Personal extends Component {
 	]
 
 	componentDidMount() {
-		if (this.props.subjects.length === 0) {
+		this.props.totalAllSubjects || this.props.actions.requestSubjects()
+	}
 
-			this.props.actions.requestSubjects()
-		}
+	filteringChange = (e, { value }) => {
+		var { setFiltering } = this.props.actions
+
+		setFiltering(value)
 	}
 
 	sortingChange = (e, { value }) => {
@@ -55,15 +58,20 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, location, subjects, sorting: column, totalPages, numberPerPage, activePage } = this.props
+		const { match, location, subjects, filtering, sorting: column, numberPerPage, activePage } = this.props
+
+		const totalPages = Math.ceil(subjects.length / numberPerPage)
 		const start = (activePage - 1) * numberPerPage
 
 		return (
 			<Container as="section">
 				<h3>Personal match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 
-				<Menu secondary>
-					<Dropdown item placeholder="( Нет )" options={this.sortingOptions} value={column} onChange={this.sortingChange} />
+				<Menu secondary stackable>
+					<Menu.Item style={{ padding: '11px 0' }}>
+            <Input icon="filter" iconPosition="left" placeholder="Фильтр..." value={filtering} onChange={this.filteringChange} />
+          </Menu.Item>
+					<Dropdown item placeholder="Сортировка" options={this.sortingOptions} value={column} onChange={this.sortingChange} />
 					
 					<Menu.Menu position='right'>
 						<Menu.Item name="add" onClick={this.addClick}>Новая запись</Menu.Item>
@@ -71,7 +79,7 @@ class Personal extends Component {
 					</Menu.Menu>
 				</Menu>
 
-				<Table celled sortable>
+				<Table celled stackable sortable>
 			    <Table.Header>
 			      <Table.Row>
 			        <Table.HeaderCell collapsing onClick={this.sort('')} />
@@ -84,7 +92,7 @@ class Personal extends Component {
 
 			    <Table.Body>
 			    	{
-			    		subjects.map(
+			    		subjects.slice(start, start + numberPerPage).map(
 			    			(item, i) => (
 			    				<Table.Row key={item.id}>
 				    				<Table.Cell>{`0${start + (i + 1)}`.slice(-2)}</Table.Cell>
@@ -94,7 +102,7 @@ class Personal extends Component {
 											<Table.Cell colSpan="4">{item.name}</Table.Cell>
 											: 
 											<Fragment>
-												<Table.Cell selectable warning><Link to={`${match.url}/${item.id}`}>{item.id}</Link></Table.Cell>
+												<Table.Cell><Link to={`${match.url}/${item.id}`}>{item.id}</Link></Table.Cell>
 						    				<Table.Cell>{item.name}</Table.Cell>
 						    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
 						    				<Table.Cell>{item.updated_at.toLocaleString('ru-RU')}</Table.Cell>
@@ -132,11 +140,12 @@ class Personal extends Component {
 export default connect(
 	state => (
 		{ 
-			subjects: selectActivePageSubjects(state),
+			totalAllSubjects: state.subjects.items.length,
+			subjects: selectSortingSubjects(state),
 
+			filtering: state.subjects.filtering,
 			sorting: state.subjects.sorting,
 
-			totalPages: selectTotalPages(state),
 			numberPerPage: state.subjects.numberPerPage,
 			activePage: state.subjects.activePage
 		}
