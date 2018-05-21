@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 
 import { bindActionCreators } from 'redux'
@@ -23,13 +23,13 @@ class Personal extends Component {
 	}
 
 	filteringChange = (e, { value }) => {
-		var { setFiltering } = this.props.actions
+		const { setFiltering } = this.props.actions
 
 		setFiltering(value)
 	}
 
 	sortingChange = (e, { value }) => {
-		var { setSorting } = this.props.actions
+		const { setSorting } = this.props.actions
 
 		setSorting(value)
 	}
@@ -46,26 +46,32 @@ class Personal extends Component {
 	}
 
 	sort = column => () => {
-		var { setSorting } = this.props.actions
+		const { setSorting } = this.props.actions
 
 		setSorting(column)
 	}
 
 	pageChange = (e, { activePage }) => {
-		var { setActivePage } = this.props.actions
+		const { setActivePage } = this.props.actions
 
 		setActivePage(activePage)
 	}
 
+	itemClick = id => e => {
+		const { setSelected } = this.props.actions
+
+		setSelected(id)
+	}
+
 	render() {
-		const { match, location, subjects, filtering, sorting: column, numberPerPage, activePage } = this.props
+		const { match, subjects, filtering, sorting: column, numberPerPage, activePage } = this.props
 
 		const totalPages = Math.ceil(subjects.length / numberPerPage)
 		const start = (activePage - 1) * numberPerPage
 
 		return (
 			<Container as="section">
-				<h3>Personal match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
+				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 
 				<Menu secondary stackable>
 					<Menu.Item style={{ padding: '11px 0' }}>
@@ -73,9 +79,9 @@ class Personal extends Component {
           </Menu.Item>
 					<Dropdown item placeholder="Сортировка" options={this.sortingOptions} value={column} onChange={this.sortingChange} />
 					
-					<Menu.Menu position='right'>
+					<Menu.Menu position="right">
 						<Menu.Item name="add" onClick={this.addClick}>Новая запись</Menu.Item>
-						<Menu.Item name="refresh" onClick={this.refreshClick}>Обновить</Menu.Item>
+						<Menu.Item name="refresh" onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Menu.Item>
 					</Menu.Menu>
 				</Menu>
 
@@ -96,18 +102,10 @@ class Personal extends Component {
 			    			(item, i) => (
 			    				<Table.Row key={item.id}>
 				    				<Table.Cell>{`0${start + (i + 1)}`.slice(-2)}</Table.Cell>
-										{
-											(new RegExp(`/${item.id}$`)).test(location.pathname)
-											?
-											<Table.Cell colSpan="4">{item.name}</Table.Cell>
-											: 
-											<Fragment>
-												<Table.Cell><Link to={`${match.url}/${item.id}`}>{item.id}</Link></Table.Cell>
-						    				<Table.Cell>{item.name}</Table.Cell>
-						    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
-						    				<Table.Cell>{item.updated_at.toLocaleString('ru-RU')}</Table.Cell>
-					    				</Fragment>
-										}
+				    				<Table.Cell style={{ fontFamily: 'monospace' }}><Link to={`${match.url}/${item.id}`} onClick={this.itemClick(item.id)}>{item.id}</Link></Table.Cell>
+				    				<Table.Cell>{item.name}</Table.Cell>
+				    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
+				    				<Table.Cell>{item.updated_at.toLocaleString('ru-RU')}</Table.Cell>
 			    				</Table.Row>			    				
 			    			)
 			    		)	

@@ -13,6 +13,7 @@ import Passages from './views/Passages'
 import Archive from './views/Archive'
 import Structure from './views/Structure'
 import Personal from './views/Personal'
+import PersonalEditor from './views/PersonalEditor'
 import Access from './views/Access'
 import Accounting from './views/Accounting'
 import Security from './views/Security'
@@ -32,7 +33,8 @@ class App extends Component {
           <PrivateRoute path='/passages' component={Passages} />
           <PrivateRoute path='/archive' component={Archive} />
           <PrivateRoute path='/structure' component={Structure} />
-          <PrivateRoute path='/personal' component={Personal} />
+          <PrivateRoute path='/personal' exact component={Personal} />
+          <PrivateRoute path='/personal/:id' component={PersonalEditor} />
           <PrivateRoute path='/access' component={Access} />
           <PrivateRoute path='/accounting' component={Accounting} />
           <PrivateRoute path='/security' component={Security} />

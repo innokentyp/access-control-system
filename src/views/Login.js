@@ -87,7 +87,7 @@ class Login extends Component {
 
 		return (
 			<Container as="section" text>
-				<h3>Login match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
+				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 				
 				<Form name="form-login" onSubmit={this.formLoginSubmit} onReset={this.formLoginReset} autoComplete="off" loading={loading} error={!!Object.keys(error).length} warning={!!Object.keys(warning).length}>		
 		      <Form.Field error={!!warning['user']}>

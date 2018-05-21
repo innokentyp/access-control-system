@@ -23,9 +23,7 @@ class Navigation extends Component {
 	render() {
 		var { pathname } = this.props.location
     var { colors } = this.state
-    var { user } = this.props
-
-    console.log(pathname)
+    var { user, subjectId } = this.props
 
 		return (
 			<Menu as="nav" fixed="top" stackable>
@@ -67,7 +65,7 @@ class Navigation extends Component {
 
         <Menu.Item
           as={Link} 
-        	to="/personal"
+        	to={subjectId ? `/personal/${subjectId}` : '/personal'}
           active={!!pathname.match(new RegExp('^/personal'))}
           color={colors[4]}
         >
@@ -135,7 +133,8 @@ export default withRouter(
   connect(
     state => (
       { 
-        user: state.authentication.user
+        user: state.authentication.user,
+        subjectId: state.subjects.selected
       }
     ), 
     dispatch => (

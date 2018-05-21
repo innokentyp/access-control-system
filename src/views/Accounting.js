@@ -5,7 +5,7 @@ class Accounting extends Component {
 	render() {
 		return (
 			<Container as="section">
-				<h3>Accounting match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>	
+				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>	
 			</Container>
 		)
 	}	

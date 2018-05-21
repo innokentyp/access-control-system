@@ -4,7 +4,8 @@ import {
   SET_FILTERING,
   SET_SORTING,
   SET_NUMBER_PER_PAGE,
-  SET_ACTIVE_PAGE
+  SET_ACTIVE_PAGE,
+  SET_SELECTED
 } from '../constants'
 
 export function requestSubjects() {
@@ -45,5 +46,12 @@ export function setActivePage(activePage) {
 	return {
 		type: SET_ACTIVE_PAGE,
 		activePage
+	}
+}
+
+export function setSelected(selected) {
+	return {
+		type: SET_SELECTED,
+		selected: selected ? selected : ''
 	}
 }
