@@ -11,8 +11,7 @@ import {
   SET_FILTERING,
   SET_SORTING,
   SET_NUMBER_PER_PAGE,
-  SET_ACTIVE_PAGE,
-  SET_SELECTED
+  SET_ACTIVE_PAGE
 } from './constants'
 
 export const preloadedState = {
@@ -27,9 +26,7 @@ export const preloadedState = {
     sorting: '',
   
     numberPerPage: 12,
-    activePage: 1,
-
-    selected: ''
+    activePage: 1
   } 
 }
 
@@ -65,8 +62,6 @@ function subjects(state = preloadedState.subjects, action) {
       return { ...state, numberPerPage: action.numberPerPage, activePage: 1 }  
     case SET_ACTIVE_PAGE: 
       return { ...state, activePage: action.activePage }
-    case SET_SELECTED:
-      return { ...state, selected: action.selected }    
   
     default:
       return state 

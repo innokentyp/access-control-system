@@ -7,6 +7,7 @@ import { Route, Switch } from 'react-router-dom'
 import Navigation from './components/Navigation'
 
 import PrivateRoute from './routes/PrivateRoute'
+import PersonalEditorRoute from './routes/PersonalEditorRoute'
 
 import Home from './views/Home'
 import Passages from './views/Passages'
@@ -34,7 +35,7 @@ class App extends Component {
           <PrivateRoute path='/archive' component={Archive} />
           <PrivateRoute path='/structure' component={Structure} />
           <PrivateRoute path='/personal' exact component={Personal} />
-          <PrivateRoute path='/personal/:id' component={PersonalEditor} />
+          <PersonalEditorRoute path='/personal/:id' component={PersonalEditor} />
           <PrivateRoute path='/access' component={Access} />
           <PrivateRoute path='/accounting' component={Accounting} />
           <PrivateRoute path='/security' component={Security} />

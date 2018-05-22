@@ -7,26 +7,32 @@ import { Container, Breadcrumb } from 'semantic-ui-react'
 import * as actions from '../store/actions/subjects'
 
 class PersonalEditor extends Component {
-	allClick = (e) => {
-		const { setSelected } = this.props.actions
+	constructor(props) {
+    super(props)
 
-		setSelected()
+    this.state = { subject: this.props.subjects.find(item => item.id === this.props.match.params.id) }
+  }
+
+	allClick = (e) => {
+		window.sessionStorage.removeItem('subjects-selected-id')
 	}
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
+
+		const { subject } = this.state
 
 		return (
 			<Container as="section">
 				<Breadcrumb>
 			    <Breadcrumb.Section link as={Link} to="/personal" onClick={this.allClick}>Список персонала</Breadcrumb.Section>
 			    <Breadcrumb.Divider icon="right arrow" />
-			    <Breadcrumb.Section active>{this.props.match.params.id}</Breadcrumb.Section>
+			    <Breadcrumb.Section active>{subject.name}</Breadcrumb.Section>
 			  </Breadcrumb>
 
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 
-				<p>{this.props.match.params.id}</p>	
+				<p>{JSON.stringify(subject)}</p>
 			</Container>
 		)
 	}	
@@ -34,7 +40,9 @@ class PersonalEditor extends Component {
 
 export default connect(
 	state => (
-		{}
+		{
+			subjects: state.subjects.items
+		}
 	),
 	dispatch => (
 		{

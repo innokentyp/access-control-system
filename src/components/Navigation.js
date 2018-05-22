@@ -20,10 +20,20 @@ class Navigation extends Component {
 		}
 	}
 
+  personalClick = (e, data) => {
+    const id = window.sessionStorage.getItem('subjects-selected-id')
+
+    if (id) {
+      e.preventDefault()
+
+      this.props.history.push(data.to + '/' + id)
+    }
+  }
+
 	render() {
 		var { pathname } = this.props.location
     var { colors } = this.state
-    var { user, subjectId } = this.props
+    var { user } = this.props
 
 		return (
 			<Menu as="nav" fixed="top" stackable>
@@ -65,9 +75,10 @@ class Navigation extends Component {
 
         <Menu.Item
           as={Link} 
-        	to={subjectId ? `/personal/${subjectId}` : '/personal'}
+        	to="/personal"
           active={!!pathname.match(new RegExp('^/personal'))}
           color={colors[4]}
+          onClick={this.personalClick}
         >
           Персонал
         </Menu.Item>
@@ -134,7 +145,7 @@ export default withRouter(
     state => (
       { 
         user: state.authentication.user,
-        subjectId: state.subjects.selected
+        subject: state.subjects.selected
       }
     ), 
     dispatch => (

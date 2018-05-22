@@ -18,7 +18,7 @@ class Personal extends Component {
 		{ key: 'updated_at', value: 'updated_at', text: 'Изменён' }  
 	]
 
-	componentDidMount() {
+	componentWillMount() {
 		this.props.totalAllSubjects || this.props.actions.requestSubjects()
 	}
 
@@ -58,9 +58,7 @@ class Personal extends Component {
 	}
 
 	itemClick = id => e => {
-		const { setSelected } = this.props.actions
-
-		setSelected(id)
+		window.sessionStorage.setItem('subjects-selected-id', id)
 	}
 
 	render() {
