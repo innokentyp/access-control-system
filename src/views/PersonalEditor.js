@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Breadcrumb } from 'semantic-ui-react'
+import { Container, Breadcrumb, Segment } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/subjects'
 
@@ -32,7 +32,18 @@ class PersonalEditor extends Component {
 
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 
-				<p>{JSON.stringify(subject)}</p>
+				<Segment>
+					<p>{subject.name ? subject.name : subject.id}</p>
+
+					<img 
+						src={subject.photo ? subject.photo : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII='} 
+						width="200" 
+						height="150" 
+						style={{ borderRadius: '4px', padding: '4px', backgroundColor: 'lightsteelblue', objectFit: 'contain' }} 
+						alt={subject.id}
+					/>
+				</Segment>
+
 			</Container>
 		)
 	}	

@@ -7,6 +7,7 @@ import {
   
   REQUEST_SUBJECTS,
   SET_SUBJECTS,
+  FETCH_SUBJECTS_FAILED,
 
   SET_FILTERING,
   SET_SORTING,
@@ -21,6 +22,7 @@ export const preloadedState = {
 
   subjects: {
     items: [],
+    error: null,
 
     filtering: '',
     sorting: '',
@@ -50,9 +52,11 @@ function authentication(state = preloadedState.authentication, action) {
 function subjects(state = preloadedState.subjects, action) {
   switch (action.type) {    
     case REQUEST_SUBJECTS:
-      return state
+      return { ...state, error: null }
     case SET_SUBJECTS:
       return { ...state, items: [ ...action.items ], activePage: 1 }
+    case FETCH_SUBJECTS_FAILED:
+      return { ...state, error: action.error }  
 
     case SET_FILTERING: 
       return { ...state, filtering: action.filtering, activePage: 1 }  

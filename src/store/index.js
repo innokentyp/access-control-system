@@ -6,7 +6,7 @@ import createSagaMiddleware from 'redux-saga'
 import { createLogger } from 'redux-logger'
 
 import reducer, { preloadedState } from './reducers'
-import requestSubjectsSaga from './sagas/requestSubjectsSaga'
+import rootSaga from './sagas/'
 
 export default function configureStore() {
 	// create the saga middleware
@@ -15,7 +15,7 @@ export default function configureStore() {
 	const store = createStore(reducer, preloadedState, applyMiddleware(thunkMiddleware, sagaMiddleware, createLogger()))  
 
 	// then run the saga
-	sagaMiddleware.run(requestSubjectsSaga)
+	sagaMiddleware.run(rootSaga)
 
 	// return
 	return store

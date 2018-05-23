@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { Container, Menu, Input, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
+import { Container, Menu, Input, Dropdown, Table, Icon, Pagination, Message } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/subjects'
 import { selectSortingSubjects } from '../store/selectors/subjects'
@@ -62,7 +62,7 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, subjects, filtering, sorting: column, numberPerPage, activePage } = this.props
+		const { match, subjects, error, filtering, sorting: column, numberPerPage, activePage } = this.props
 
 		const totalPages = Math.ceil(subjects.length / numberPerPage)
 		const start = (activePage - 1) * numberPerPage
@@ -127,6 +127,15 @@ class Personal extends Component {
 			      </Table.Row>
 			    </Table.Footer>
 			  </Table>
+		
+				{
+					error 
+					&&
+				  <Message negative>
+				    <Message.Header>Невозможно получить список персонала</Message.Header>
+				    <p>{error.message}</p>
+				  </Message>
+			  }	
 
 			</Container>
 		)
@@ -138,6 +147,8 @@ export default connect(
 		{ 
 			totalAllSubjects: state.subjects.items.length,
 			subjects: selectSortingSubjects(state),
+
+			error: state.subjects.error,
 
 			filtering: state.subjects.filtering,
 			sorting: state.subjects.sorting,

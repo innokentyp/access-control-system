@@ -1,7 +1,7 @@
 import { call, put, select, takeLatest } from 'redux-saga/effects'
 import axios from 'axios'
 
-import { REQUEST_SUBJECTS, SET_SUBJECTS } from '../constants'
+import { REQUEST_SUBJECTS, SET_SUBJECTS, FETCH_SUBJECTS_FAILED } from '../constants'
 
 function* fetchSubjects(action) {
   try {
@@ -15,8 +15,8 @@ function* fetchSubjects(action) {
     )
 
     yield put({ type: SET_SUBJECTS, items: response.data })
-  } catch (e) {    
-    console.error(e.message)
+  } catch (e) {   
+    yield put({ type: FETCH_SUBJECTS_FAILED, error: e }) 
   }
 }
 
