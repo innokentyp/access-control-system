@@ -2,25 +2,33 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Breadcrumb, Segment } from 'semantic-ui-react'
+import { Container, Breadcrumb, Segment, Button } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/subjects'
+import { selectSubject } from '../store/selectors/personal'
 
 class PersonalEditor extends Component {
-	constructor(props) {
-    super(props)
-
-    this.state = { subject: this.props.subjects.find(item => item.id === this.props.match.params.id) }
-  }
-
 	allClick = (e) => {
 		window.sessionStorage.removeItem('subjects-selected-id')
+	}
+
+	clearClick = (e) => {
+		this.props.actions.setSubjects(
+			[
+				{
+					id: "1w18g4cif9bhebp4",
+					name: "Васильева Лорна Абрикосовна",
+					created_at: "01.01.2018 00:00:00",
+					updated_at: "01.01.2018 00:00:00"
+				}
+			]
+		)
 	}
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { subject } = this.state
+		const { subject } = this.props
 
 		return (
 			<Container as="section">
@@ -44,15 +52,16 @@ class PersonalEditor extends Component {
 					/>
 				</Segment>
 
+				<Button onClick={this.clearClick}>Clear</Button>
 			</Container>
 		)
 	}	
 }
 
 export default connect(
-	state => (
+	(state, props) => (
 		{
-			subjects: state.subjects.items
+			subject: selectSubject(state, props)
 		}
 	),
 	dispatch => (

@@ -1,16 +1,7 @@
 import { createSelector } from 'reselect'
 
-export const selectAllSubjects = createSelector(
-	state => state.subjects.items,
-	subjects => {
-		console.log('selectAllSubjects')
-
-		return subjects.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
-	}
-)
-
 export const selectFilteringSubjects = createSelector(
-	[ selectAllSubjects, state => state.subjects.filtering ],
+	[ state => state.subjects.items, state => state.personal.filtering ],
 	(subjects, filtering) => {
 		console.log('selectFilteringSubjects')
 
@@ -28,10 +19,10 @@ export const selectFilteringSubjects = createSelector(
 	}
 )
 
-export const selectSortingSubjects = createSelector(
-	[ selectFilteringSubjects, state => state.subjects.sorting ],
+export const selectSubjects = createSelector(
+	[ selectFilteringSubjects, state => state.personal.sorting ],
 	(subjects, sorting) => {
-		console.log('selectSortingSubjects')
+		console.log('selectSubjects')
 		
 		if (sorting) {
 			let items = subjects
@@ -59,4 +50,13 @@ export const selectSortingSubjects = createSelector(
 
 		return subjects
 	}	
+)
+
+export const selectSubject = createSelector(
+	(state, props) => state.subjects.items.find(item => item.id === props.match.params.id),
+	subject => {
+		console.log('selectSubject')
+
+		return subject
+	} 
 )

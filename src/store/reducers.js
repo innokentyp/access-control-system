@@ -10,9 +10,7 @@ import {
   FETCH_SUBJECTS_FAILED,
 
   SET_FILTERING,
-  SET_SORTING,
-  SET_NUMBER_PER_PAGE,
-  SET_ACTIVE_PAGE
+  SET_SORTING
 } from './constants'
 
 export const preloadedState = {
@@ -22,14 +20,13 @@ export const preloadedState = {
 
   subjects: {
     items: [],
-    error: null,
+    error: null
+  },  
 
+  personal: {
     filtering: '',
-    sorting: '',
-  
-    numberPerPage: 12,
-    activePage: 1
-  } 
+    sorting: ''
+  }
 }
 
 function authentication(state = preloadedState.authentication, action) {
@@ -54,22 +51,23 @@ function subjects(state = preloadedState.subjects, action) {
     case REQUEST_SUBJECTS:
       return { ...state, error: null }
     case SET_SUBJECTS:
-      return { ...state, items: [ ...action.items ], activePage: 1 }
+      return { ...state, items: action.items.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) })) }
     case FETCH_SUBJECTS_FAILED:
-      return { ...state, error: action.error }  
-
-    case SET_FILTERING: 
-      return { ...state, filtering: action.filtering, activePage: 1 }  
-    case SET_SORTING: 
-      return { ...state, sorting: action.sorting }  
-    case SET_NUMBER_PER_PAGE: 
-      return { ...state, numberPerPage: action.numberPerPage, activePage: 1 }  
-    case SET_ACTIVE_PAGE: 
-      return { ...state, activePage: action.activePage }
-  
+      return { ...state, error: action.error }
     default:
       return state 
   }
 }
 
-export default combineReducers({ authentication, subjects })
+function personal(state = preloadedState.personal, action) {
+  switch (action.type) {    
+    case SET_FILTERING: 
+      return { ...state, filtering: action.filtering }  
+    case SET_SORTING: 
+      return { ...state, sorting: action.sorting }  
+    default:
+      return state 
+  }
+}
+
+export default combineReducers({ authentication, subjects, personal })

@@ -6,10 +6,16 @@ import { connect } from 'react-redux'
 
 import { Container, Menu, Input, Dropdown, Table, Icon, Pagination, Message } from 'semantic-ui-react'
 
-import * as actions from '../store/actions/subjects'
-import { selectSortingSubjects } from '../store/selectors/subjects'
+import * as subjectsActions from '../store/actions/subjects'
+import * as personalActions from '../store/actions/personal'
+import { selectSubjects } from '../store/selectors/personal'
 
 class Personal extends Component {
+	state = {
+		numberPerPage: 12,
+    activePage: window.sessionStorage.getItem('personal-active-page') || 1
+	}
+
 	sortingOptions = [
 		{ key: '', value: '', text: '( Нет )' },
 		{ key: 'id', value: 'id', text: 'ID' },
@@ -22,16 +28,34 @@ class Personal extends Component {
 		this.props.totalAllSubjects || this.props.actions.requestSubjects()
 	}
 
+	componentWillUnmount() {
+		window.sessionStorage.setItem('personal-active-page', this.state.activePage)
+	}
+
+	static search(values) {
+		var query = ''
+
+		for (var key in values) {
+			if (values[key]) query += `${query ? '&' : '?'}${key}=${encodeURIComponent(values[key])}` 
+		}
+
+		return query
+	}
+
 	filteringChange = (e, { value }) => {
 		const { setFiltering } = this.props.actions
 
 		setFiltering(value)
+
+		//this.props.history.push({ pathname: this.props.location.pathname, search: Personal.search({ filtering: value, sorting: this.props.sorting }) })		
 	}
 
 	sortingChange = (e, { value }) => {
 		const { setSorting } = this.props.actions
 
 		setSorting(value)
+
+		//this.props.history.push({ pathname: this.props.location.pathname, search: Personal.search({ filtering: this.props.filtering, sorting: value }) })
 	}
 
 	addClick = (e, { name }) => {
@@ -52,9 +76,7 @@ class Personal extends Component {
 	}
 
 	pageChange = (e, { activePage }) => {
-		const { setActivePage } = this.props.actions
-
-		setActivePage(activePage)
+		this.setState({ activePage })
 	}
 
 	itemClick = id => e => {
@@ -62,9 +84,12 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, subjects, error, filtering, sorting: column, numberPerPage, activePage } = this.props
+		const { match, subjects, error, filtering, sorting: column } = this.props
+		var { numberPerPage, activePage } = this.state
 
 		const totalPages = Math.ceil(subjects.length / numberPerPage)
+		if (activePage > totalPages) activePage = totalPages
+
 		const start = (activePage - 1) * numberPerPage
 
 		return (
@@ -146,20 +171,17 @@ export default connect(
 	state => (
 		{ 
 			totalAllSubjects: state.subjects.items.length,
-			subjects: selectSortingSubjects(state),
+			subjects: selectSubjects(state),
 
 			error: state.subjects.error,
 
-			filtering: state.subjects.filtering,
-			sorting: state.subjects.sorting,
-
-			numberPerPage: state.subjects.numberPerPage,
-			activePage: state.subjects.activePage
+			filtering: state.personal.filtering,
+			sorting: state.personal.sorting
 		}
 	), 
 	dispatch => (
 		{ 
-			actions: bindActionCreators(actions, dispatch)
+			actions: { ...bindActionCreators(subjectsActions, dispatch), ...bindActionCreators(personalActions, dispatch)	}		
 		}
 	)
 )(Personal) 
