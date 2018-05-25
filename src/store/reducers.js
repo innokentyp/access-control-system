@@ -9,6 +9,9 @@ import {
   SET_SUBJECTS,
   FETCH_SUBJECTS_FAILED,
 
+  REQUEST_SUBJECT_PHOTO, 
+  SET_SUBJECT_PHOTO,
+
   SET_FILTERING,
   SET_SORTING
 } from './constants'
@@ -54,6 +57,12 @@ function subjects(state = preloadedState.subjects, action) {
       return { ...state, items: action.items.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) })) }
     case FETCH_SUBJECTS_FAILED:
       return { ...state, error: action.error }
+
+    case REQUEST_SUBJECT_PHOTO: 
+      return state 
+    case SET_SUBJECT_PHOTO:
+      return { ...state, items: state.items.map(item => (item.id === action.id ? { ...item, photo: action.photo } : item)) }
+
     default:
       return state 
   }

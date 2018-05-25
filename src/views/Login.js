@@ -56,9 +56,15 @@ class Login extends Component {
 			this.props.actions.login({ name: e.target.user.value, password: e.target.password.value, remember: e.target.remember.checked })
 				.then (
 					() => {
-						var { history, location } = this.props
+						if (this.props.authenticated) {
+							const { history, location } = this.props
 
-						location.state ? history.replace(location.state.from.pathname === location.pathname ? '/' : location.state.from.pathname) : history.replace('/')
+							location.state ? history.replace(location.state.from.pathname === location.pathname ? '/' : location.state.from.pathname) : history.replace('/')
+						} else {
+							this.setState({ loading: false, error: { message: 'Unable to find user' } })
+
+				  		this.inputUser.current.select()
+				  	}
 					}
 				)
 				.catch (

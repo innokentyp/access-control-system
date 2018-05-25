@@ -7,12 +7,11 @@ import {
 
 export function login(credentials) { 
 	return dispatch => {
-		return axios.get(`/login/${credentials.name}-${credentials.password}.json`)
-			.then (
-		  	response => {
-					dispatch(loginSucceeded({ name: credentials.name, ...response.data }))
-			  }
-		  )	
+		return axios.get('http://localhost:8000/users', { params: { name: credentials.name, password: credentials.password } }).then(
+	  	response => {
+				if (response.data.length) dispatch(loginSucceeded({ name: response.data[0].name, jwt: response.data[0].jwt }))
+		  }
+	  )	
 	}  	  			  
 }
 

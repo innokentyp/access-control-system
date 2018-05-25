@@ -7,9 +7,9 @@ function* fetchSubjects(action) {
   try {
     const response = yield call(
     	axios.get, 
-    	'/data/subjects.json', 
+    	'http://localhost:8000/subjects', 
     	{ 
-    		params: { items: 'all' }, 
+    		params: { }, 
     		headers: { 'Authorization': `Bearer ${yield select((state) => state.authentication.user.jwt)}` } 
     	}
     )

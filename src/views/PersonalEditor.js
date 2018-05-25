@@ -8,21 +8,16 @@ import * as actions from '../store/actions/subjects'
 import { selectSubject } from '../store/selectors/personal'
 
 class PersonalEditor extends Component {
+	componentWillMount() {
+		this.props.subject.photo === undefined && this.props.actions.requestSubjectPhoto(this.props.subject.id)
+	}
+
 	allClick = (e) => {
 		window.sessionStorage.removeItem('subjects-selected-id')
 	}
 
-	clearClick = (e) => {
-		this.props.actions.setSubjects(
-			[
-				{
-					id: "1w18g4cif9bhebp4",
-					name: "Васильева Лорна Абрикосовна",
-					created_at: "01.01.2018 00:00:00",
-					updated_at: "01.01.2018 00:00:00"
-				}
-			]
-		)
+	backClick = (e) => {
+		this.props.history.goBack()
 	}
 
 	render() {
@@ -52,7 +47,7 @@ class PersonalEditor extends Component {
 					/>
 				</Segment>
 
-				<Button onClick={this.clearClick}>Clear</Button>
+				<Button onClick={this.backClick}>Back</Button>
 			</Container>
 		)
 	}	
