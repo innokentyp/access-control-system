@@ -3,24 +3,25 @@ import axios from 'axios'
 
 import * as types from '../constants'
 
-function* fetchSubjects(action) {
+function* fetchSubject(action) {
   try {
     const response = yield call(
     	axios.get, 
-    	'http://localhost:8000/subjects', 
+    	`http://localhost:8000/subjects/${action.id}`, 
     	{ 
+        params: { _embed: 'photos' },    		
     		headers: { 'Authorization': `Bearer ${yield select((state) => state.authentication.user.jwt)}` } 
     	}
     )
-
-    yield put({ type: types.SUBJECTS_FETCHED, subjects: response.data })
+    
+    yield put({ type: types.SUBJECT_FETCHED, subject: response.data })    
   } catch (e) {   
     console.log(e.message) 
   }
 }
 
-function* requestSubjectsSaga() {
-  yield takeLatest(types.REQUEST_SUBJECTS, fetchSubjects)
+function* requestSubjectSaga() {
+  yield takeLatest(types.REQUEST_SUBJECT, fetchSubject)
 }
 
-export default requestSubjectsSaga
+export default requestSubjectSaga

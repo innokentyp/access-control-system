@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { Container, Menu, Input, Dropdown, Table, Icon, Pagination, Message } from 'semantic-ui-react'
+import { Container, Menu, Input, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
 
-import * as subjectsActions from '../store/actions/subjects'
-import * as personalActions from '../store/actions/personal'
-import { selectSubjects } from '../store/selectors/personal'
+import * as actions from '../store/actions/personal'
+import { getSubjects } from '../store/selectors/personal'
 
 class Personal extends Component {
 	state = {
@@ -25,7 +24,11 @@ class Personal extends Component {
 	]
 
 	componentWillMount() {
-		this.props.totalAllSubjects || this.props.actions.requestSubjects()
+		if (!Personal.mounted) {
+			this.props.actions.requestSubjects()
+
+			Personal.mounted = true
+		}
 	}
 
 	componentWillUnmount() {
@@ -84,7 +87,7 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, subjects, error, filtering, sorting: column } = this.props
+		const { match, subjects, filtering, sorting: column } = this.props
 		var { numberPerPage, activePage } = this.state
 
 		const totalPages = Math.ceil(subjects.length / numberPerPage)
@@ -152,28 +155,15 @@ class Personal extends Component {
 			      </Table.Row>
 			    </Table.Footer>
 			  </Table>
-		
-				{
-					error 
-					&&
-				  <Message negative>
-				    <Message.Header>Невозможно получить список персонала</Message.Header>
-				    <p>{error.message}</p>
-				  </Message>
-			  }	
-
 			</Container>
 		)
 	}
 }
 
 export default connect(
-	state => (
+	(state, props) => (
 		{ 
-			totalAllSubjects: state.subjects.items.length,
-			subjects: selectSubjects(state),
-
-			error: state.subjects.error,
+			subjects: getSubjects(state),
 
 			filtering: state.personal.filtering,
 			sorting: state.personal.sorting
@@ -181,7 +171,7 @@ export default connect(
 	), 
 	dispatch => (
 		{ 
-			actions: { ...bindActionCreators(subjectsActions, dispatch), ...bindActionCreators(personalActions, dispatch)	}		
+			actions: bindActionCreators(actions, dispatch)		
 		}
 	)
 )(Personal) 

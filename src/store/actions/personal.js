@@ -1,18 +1,28 @@
-import {
-  SET_FILTERING,
-  SET_SORTING
-} from '../constants'
+import * as types from '../constants'
+
+export function requestSubjects() {
+	return {
+		type: types.REQUEST_SUBJECTS
+	}
+}
+
+export function subjectsFetched(subjects) {
+	return {
+		type: types.SUBJECTS_FETCHED,
+		subjects
+	}
+}
 
 export function setFiltering(filtering) {
 	return {
-		type: SET_FILTERING,
+		type: types.SET_FILTERING,
 		filtering
 	}
 }
 
 export function setSorting(sorting) {
 	return {
-		type: SET_SORTING,
+		type: types.SET_SORTING,
 		sorting
 	}
 }

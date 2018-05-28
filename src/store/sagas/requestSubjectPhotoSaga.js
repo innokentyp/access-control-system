@@ -1,7 +1,7 @@
 import { call, put, select, takeLatest } from 'redux-saga/effects'
 import axios from 'axios'
 
-import { REQUEST_SUBJECT_PHOTO, SET_SUBJECT_PHOTO } from '../constants'
+import * as types from '../constants'
 
 function* fetchSubjectPhoto(action) {
   try {
@@ -14,14 +14,14 @@ function* fetchSubjectPhoto(action) {
     	}
     )
     
-    yield put({ type: SET_SUBJECT_PHOTO, id: action.id, photo: response.data.length ? response.data[0].photo : '' })    
+    yield put({ type: types.SET_SUBJECT_PHOTO, id: action.id, photo: response.data.length ? response.data[0].photo : '' })    
   } catch (e) {   
     console.log(e.message) 
   }
 }
 
 function* requestSubjectPhotoSaga() {
-  yield takeLatest(REQUEST_SUBJECT_PHOTO, fetchSubjectPhoto)
+  yield takeLatest(types.REQUEST_SUBJECT_PHOTO, fetchSubjectPhoto)
 }
 
 export default requestSubjectPhotoSaga

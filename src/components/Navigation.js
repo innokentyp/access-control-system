@@ -144,8 +144,7 @@ export default withRouter(
   connect(
     state => (
       { 
-        user: state.authentication.user,
-        subject: state.subjects.selected
+        user: state.authentication.user
       }
     ), 
     dispatch => (

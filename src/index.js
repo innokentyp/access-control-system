@@ -11,7 +11,7 @@ import 'semantic-ui-css/semantic.min.css'
 import './index.css'
 
 import configureStore from './store/'
-import { loginSucceeded } from './store/actions/authentication'
+import { loggedIn } from './store/actions/authentication'
 import App from './App'
 
 import registerServiceWorker from './registerServiceWorker'
@@ -23,7 +23,7 @@ try {
 	let jwt = window.sessionStorage.getItem('jwt')
 
 	if (jwt) {
-	  store.dispatch(loginSucceeded({ name: decode(jwt).name, jwt }))
+	  store.dispatch(loggedIn({ name: decode(jwt).name, jwt }))
 	}
 } catch (e) {
 	console.log(e.message)

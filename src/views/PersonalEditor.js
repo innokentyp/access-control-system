@@ -4,12 +4,12 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Container, Breadcrumb, Segment, Button } from 'semantic-ui-react'
 
-import * as actions from '../store/actions/subjects'
-import { selectSubject } from '../store/selectors/personal'
+import * as actions from '../store/actions/personal_editor'
+import { getSubject } from '../store/selectors/personal_editor'
 
 class PersonalEditor extends Component {
 	componentWillMount() {
-		this.props.subject.photo === undefined && this.props.actions.requestSubjectPhoto(this.props.subject.id)
+		this.props.subject.id === this.props.match.params.id || this.props.actions.requestSubject(this.props.match.params.id)
 	}
 
 	allClick = (e) => {
@@ -39,7 +39,7 @@ class PersonalEditor extends Component {
 					<p>{subject.name ? subject.name : subject.id}</p>
 
 					<img 
-						src={subject.photo ? subject.photo : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII='} 
+						src={(subject.photos && subject.photos.length) ? subject.photos[0].photo : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII='} 
 						width="200" 
 						height="150" 
 						style={{ borderRadius: '4px', padding: '4px', backgroundColor: 'lightsteelblue', objectFit: 'contain' }} 
@@ -56,7 +56,7 @@ class PersonalEditor extends Component {
 export default connect(
 	(state, props) => (
 		{
-			subject: selectSubject(state, props)
+			subject: getSubject(state, props)
 		}
 	),
 	dispatch => (
