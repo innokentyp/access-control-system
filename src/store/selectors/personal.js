@@ -9,15 +9,6 @@ export const getSubjects = createSelector(
 	}	
 )
 
-export const getSubject = createSelector(
-	(state, props) => state.personal.subjects.find(item => item.id === props.match.params.id),
-	subject => {
-		console.log('selectSubject')
-
-		return subject
-	} 
-)
-
 export const selectFilteringSubjects = createSelector(
 	[ state => state.personal.subjects, state => state.personal.filtering ],
 	(subjects, filtering) => {
@@ -68,13 +59,4 @@ export const selectSubjects = createSelector(
 
 		return subjects
 	}	
-)
-
-export const selectSubject = createSelector(
-	(state, props) => state.personal.subjects.find(item => item.id === props.match.params.id),
-	subject => {
-		console.log('selectSubject')
-
-		return subject
-	} 
 )

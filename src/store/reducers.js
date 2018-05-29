@@ -2,6 +2,10 @@ import { combineReducers } from 'redux'
 
 import * as types from './constants'
 
+// constants
+personal_editor.MAX_SUBJECTS = 12
+
+// preloaded state
 export const preloadedState = {
   authentication: {
     user: {}
@@ -15,10 +19,11 @@ export const preloadedState = {
   },
 
   personal_editor: {
-    subject: {}
+    subjects: {}
   } 
 }
 
+// reducers
 function authentication(state = preloadedState.authentication, action) {
   switch (action.type) {
     case types.LOGGED_IN:
@@ -47,8 +52,15 @@ function personal(state = preloadedState.personal, action) {
 function personal_editor(state = preloadedState.personal_editor, action) {
   switch (action.type) {    
     case types.SUBJECT_FETCHED:
-      return { ...state, subject: action.subject }
-    
+      const subjects = { ...state.subjects, [action.subject.id]: action.subject }
+      const ids = Object.keys(subjects)
+
+      while (ids.length > personal_editor.MAX_SUBJECTS) {
+        delete subjects[ids[0]]
+        ids.splice(0, 1)
+      }
+
+      return { ...state, subjects }    
     default:
       return state 
   }

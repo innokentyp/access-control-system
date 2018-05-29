@@ -8,10 +8,6 @@ import * as actions from '../store/actions/personal_editor'
 import { getSubject } from '../store/selectors/personal_editor'
 
 class PersonalEditor extends Component {
-	componentWillMount() {
-		this.props.subject.id === this.props.match.params.id || this.props.actions.requestSubject(this.props.match.params.id)
-	}
-
 	allClick = (e) => {
 		window.sessionStorage.removeItem('subjects-selected-id')
 	}
@@ -30,7 +26,7 @@ class PersonalEditor extends Component {
 				<Breadcrumb>
 			    <Breadcrumb.Section link as={Link} to="/personal" onClick={this.allClick}>Список персонала</Breadcrumb.Section>
 			    <Breadcrumb.Divider icon="right arrow" />
-			    <Breadcrumb.Section active>{subject.name}</Breadcrumb.Section>
+			    <Breadcrumb.Section active>{subject.name ? subject.name : subject.id}</Breadcrumb.Section>
 			  </Breadcrumb>
 
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
@@ -45,6 +41,8 @@ class PersonalEditor extends Component {
 						style={{ borderRadius: '4px', padding: '4px', backgroundColor: 'lightsteelblue', objectFit: 'contain' }} 
 						alt={subject.id}
 					/>
+
+					<p>{subject.created_at.toLocaleString('ru-RU')} / {subject.updated_at.toLocaleString('ru-RU')}</p>
 				</Segment>
 
 				<Button onClick={this.backClick}>Back</Button>
@@ -56,7 +54,7 @@ class PersonalEditor extends Component {
 export default connect(
 	(state, props) => (
 		{
-			subject: getSubject(state, props)
+			subject: getSubject(state, props.match.params.id)
 		}
 	),
 	dispatch => (

@@ -1,11 +1,26 @@
 import { createSelector } from 'reselect'
 
-export const getSubject = createSelector(
-	(state, props) => state.personal_editor.subject,
-	subject => {
-		console.log('getSubject')
+import { store } from '../'
+import { requestSubject } from '../actions/personal_editor'
 
-		return subject
+export const getSubject = createSelector(
+	[(state, id) => state.personal_editor.subjects[id], (state, id) => id],
+	(subject, id) => {
+		console.log(`getSubject for ${id}`)
+
+		if (subject) 
+			return { ...subject, created_at: new Date(subject.created_at), updated_at: new Date(subject.updated_at) }
+		else {
+			store.dispatch(requestSubject(id))
+
+			return {
+				id,
+				name: '',
+  			created_at: new Date(),
+  			updated_at: new Date(),
+  			photos: []
+			}	
+		}
 	} 
 )
 
