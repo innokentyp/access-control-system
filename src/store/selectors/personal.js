@@ -1,18 +1,27 @@
 import { createSelector } from 'reselect'
 
+import { _store } from '../'
+import { requestSubjects } from '../actions/personal'
+
 export const getSubjects = createSelector(
-	state => state.personal.subjects,
-	subjects => {
+	[ state => state.personal.subjects, state => state.personal.at ],
+	(subjects, at) => {
 		console.log('getSubjects')
+
+		at > 0 || _store.dispatch(requestSubjects())
 		
 		return subjects.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
 	}	
 )
 
-export const selectFilteringSubjects = createSelector(
-	[ state => state.personal.subjects, state => state.personal.filtering ],
+export function getFiltering(state) {
+ 	return state.personal.filtering
+}
+
+export const getSubjectsWithFiltering = createSelector(
+	[ getSubjects, state => state.personal.filtering ],
 	(subjects, filtering) => {
-		console.log('selectFilteringSubjects')
+		console.log('getSubjectsWithFiltering')
 
 		if (filtering) {
 			try {
@@ -28,21 +37,23 @@ export const selectFilteringSubjects = createSelector(
 	}
 )
 
-export const selectSubjects = createSelector(
-	[ selectFilteringSubjects, state => state.personal.sorting ],
+export function getSorting(state) {
+ 	return state.personal.sorting
+}
+
+export const getSubjectsWithFilteringAndSorting = createSelector(
+	[ getSubjectsWithFiltering, state => state.personal.sorting ],
 	(subjects, sorting) => {
-		console.log('selectSubjects')
+		console.log('getSubjectsWithFilteringAndSorting')
 		
 		if (sorting) {
-			let items = subjects
-
-			items.sort(
+			return [...subjects].sort(
 				(a, b) => {
 					switch (sorting) {
 						case 'id':
 							return a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)
 						case 'name': 
-							let [ x, y ] = [ a.name.toLowerCase(), b.name.toLowerCase() ]
+							let [ x, y ] = [ a.name ? a.name.toLowerCase() : 'яяя', b.name ? b.name.toLowerCase() : 'яяя' ]
 							return x < y ? -1 : (x > y ? 1 : 0)
 						case 'created_at':
 							return a.created_at.getTime() - b.created_at.getTime()
@@ -53,8 +64,6 @@ export const selectSubjects = createSelector(
 					}
 				}
 			)
-
-			return items
 		}
 
 		return subjects

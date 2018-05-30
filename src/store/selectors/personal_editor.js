@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import { store } from '../'
+import { _store } from '../'
 import { requestSubject } from '../actions/personal_editor'
 
 export const getSubject = createSelector(
@@ -11,7 +11,7 @@ export const getSubject = createSelector(
 		if (subject) 
 			return { ...subject, created_at: new Date(subject.created_at), updated_at: new Date(subject.updated_at) }
 		else {
-			store.dispatch(requestSubject(id))
+			_store.dispatch(requestSubject(id))
 
 			return {
 				id,

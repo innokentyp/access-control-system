@@ -7,13 +7,15 @@ import { connect } from 'react-redux'
 import { Container, Menu, Input, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/personal'
-import { getSubjects } from '../store/selectors/personal'
+import * as selectors from '../store/selectors/personal'
 
 class Personal extends Component {
+	/*
 	state = {
-		numberPerPage: 12,
+		numberPerPage: 16,
     activePage: window.sessionStorage.getItem('personal-active-page') || 1
 	}
+	*/
 
 	sortingOptions = [
 		{ key: '', value: '', text: '( Нет )' },
@@ -23,42 +25,16 @@ class Personal extends Component {
 		{ key: 'updated_at', value: 'updated_at', text: 'Изменён' }  
 	]
 
-	componentWillMount() {
-		if (!Personal.mounted) {
-			this.props.actions.requestSubjects()
-
-			Personal.mounted = true
-		}
-	}
-
 	componentWillUnmount() {
-		window.sessionStorage.setItem('personal-active-page', this.state.activePage)
-	}
-
-	static search(values) {
-		var query = ''
-
-		for (var key in values) {
-			if (values[key]) query += `${query ? '&' : '?'}${key}=${encodeURIComponent(values[key])}` 
-		}
-
-		return query
+		//window.sessionStorage.setItem('personal-active-page', this.state.activePage)
 	}
 
 	filteringChange = (e, { value }) => {
-		const { setFiltering } = this.props.actions
-
-		setFiltering(value)
-
-		//this.props.history.push({ pathname: this.props.location.pathname, search: Personal.search({ filtering: value, sorting: this.props.sorting }) })		
+		this.props.actions.setFiltering(value)
 	}
 
 	sortingChange = (e, { value }) => {
-		const { setSorting } = this.props.actions
-
-		setSorting(value)
-
-		//this.props.history.push({ pathname: this.props.location.pathname, search: Personal.search({ filtering: this.props.filtering, sorting: value }) })
+		this.props.actions.setSorting(value)
 	}
 
 	addClick = (e, { name }) => {
@@ -67,19 +43,17 @@ class Personal extends Component {
 	}
 
 	refreshClick = (e, { name }) => {
-		const { requestSubjects } = this.props.actions
-
-		requestSubjects()
+		this.props.actions.requestSubjects(this.props.activePage, this.props.numberPerPage)
 	}
 
 	sort = column => () => {
-		const { setSorting } = this.props.actions
-
-		setSorting(column)
+		this.props.actions.setSorting(column)
 	}
 
 	pageChange = (e, { activePage }) => {
-		this.setState({ activePage })
+		//this.setState({ activePage })
+
+		this.props.actions.requestSubjects(activePage, this.props.numberPerPage)
 	}
 
 	itemClick = id => e => {
@@ -87,10 +61,11 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, subjects, filtering, sorting: column } = this.props
-		var { numberPerPage, activePage } = this.state
+		const { match, subjects, filtering, sorting: column, numberPerPage } = this.props
+		var { activePage } = this.props
+		//var { numberPerPage, activePage } = this.state
 
-		const totalPages = Math.ceil(subjects.length / numberPerPage)
+		const totalPages = Math.ceil(/*subjects.length*/21 / numberPerPage) // !!! SAMOPAL
 		if (activePage > totalPages) activePage = totalPages
 
 		const start = (activePage - 1) * numberPerPage
@@ -111,7 +86,7 @@ class Personal extends Component {
 					</Menu.Menu>
 				</Menu>
 
-				<Table celled stackable sortable>
+				<Table compact celled striped stackable sortable>
 			    <Table.Header>
 			      <Table.Row>
 			        <Table.HeaderCell collapsing onClick={this.sort('')} />
@@ -124,12 +99,12 @@ class Personal extends Component {
 
 			    <Table.Body>
 			    	{
-			    		subjects.slice(start, start + numberPerPage).map(
+			    		subjects/*.slice(start, start + numberPerPage)*/.map(
 			    			(item, i) => (
 			    				<Table.Row key={item.id}>
 				    				<Table.Cell>{`0${start + (i + 1)}`.slice(-2)}</Table.Cell>
 				    				<Table.Cell style={{ fontFamily: 'monospace' }}><Link to={`${match.url}/${item.id}`} onClick={this.itemClick(item.id)}>{item.id}</Link></Table.Cell>
-				    				<Table.Cell>{item.name}</Table.Cell>
+				    				<Table.Cell>{item.name ? item.name : '(Нет)'}</Table.Cell>
 				    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
 				    				<Table.Cell>{item.updated_at.toLocaleString('ru-RU')}</Table.Cell>
 			    				</Table.Row>			    				
@@ -163,10 +138,13 @@ class Personal extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			subjects: getSubjects(state),
+			subjects:  selectors.getSubjects(state), // selectors.getSubjectsWithFilteringAndSorting(state),
 
-			filtering: state.personal.filtering,
-			sorting: state.personal.sorting
+			filtering: selectors.getFiltering(state),
+			sorting: selectors.getSorting(state),
+
+			numberPerPage: state.personal.limit,
+			activePage: state.personal.page			
 		}
 	), 
 	dispatch => (

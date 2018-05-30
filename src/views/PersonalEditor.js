@@ -12,6 +12,10 @@ class PersonalEditor extends Component {
 		window.sessionStorage.removeItem('subjects-selected-id')
 	}
 
+	saveClick = (e) => {
+
+	}
+
 	backClick = (e) => {
 		this.props.history.goBack()
 	}
@@ -43,8 +47,10 @@ class PersonalEditor extends Component {
 					/>
 
 					<p>{subject.created_at.toLocaleString('ru-RU')} / {subject.updated_at.toLocaleString('ru-RU')}</p>
-				</Segment>
 
+					<Button onClick={this.saveClick}>Save</Button>
+				</Segment>
+				
 				<Button onClick={this.backClick}>Back</Button>
 			</Container>
 		)

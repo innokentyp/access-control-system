@@ -13,6 +13,9 @@ export const preloadedState = {
 
   personal: {
     subjects: [],
+    at: 0,
+    page: 1,
+    limit: 16,
 
     filtering: '',
     sorting: ''
@@ -38,7 +41,7 @@ function authentication(state = preloadedState.authentication, action) {
 function personal(state = preloadedState.personal, action) {
   switch (action.type) {    
     case types.SUBJECTS_FETCHED:
-      return { ...state, subjects: action.subjects }
+      return { ...state, subjects: action.subjects, at: action.at, page: action.page, limit: action.limit }
 
     case types.SET_FILTERING: 
       return { ...state, filtering: action.filtering }  

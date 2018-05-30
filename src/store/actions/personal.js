@@ -1,15 +1,20 @@
 import * as types from '../constants'
 
-export function requestSubjects() {
+export function requestSubjects(activePage = 1, numberPerPage = 16) {
 	return {
-		type: types.REQUEST_SUBJECTS
+		type: types.REQUEST_SUBJECTS,
+		activePage,
+		numberPerPage
 	}
 }
 
-export function subjectsFetched(subjects) {
+export function subjectsFetched(subjects, at, page, limit) {
 	return {
 		type: types.SUBJECTS_FETCHED,
-		subjects
+		subjects,
+		at,
+		page,
+		limit,
 	}
 }
 
