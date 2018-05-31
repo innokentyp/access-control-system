@@ -1,33 +1,17 @@
 import * as types from '../constants'
 
-export function requestSubjects(activePage = 1, numberPerPage = 16) {
+export function requestSubjects(query = { _page: 1, _limit: 16 }) {
 	return {
 		type: types.REQUEST_SUBJECTS,
-		activePage,
-		numberPerPage
+		query
 	}
 }
 
-export function subjectsFetched(subjects, at, page, limit) {
+export function subjectsFetched(query, subjects, at) {
 	return {
 		type: types.SUBJECTS_FETCHED,
+		query,
 		subjects,
-		at,
-		page,
-		limit,
-	}
-}
-
-export function setFiltering(filtering) {
-	return {
-		type: types.SET_FILTERING,
-		filtering
-	}
-}
-
-export function setSorting(sorting) {
-	return {
-		type: types.SET_SORTING,
-		sorting
+		at
 	}
 }

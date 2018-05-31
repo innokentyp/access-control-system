@@ -3,6 +3,10 @@ import { createSelector } from 'reselect'
 import { _store } from '../'
 import { requestSubjects } from '../actions/personal'
 
+export function getQuery(state) {
+	return state.personal.query
+}
+
 export const getSubjects = createSelector(
 	[ state => state.personal.subjects, state => state.personal.at ],
 	(subjects, at) => {
@@ -14,10 +18,7 @@ export const getSubjects = createSelector(
 	}	
 )
 
-export function getFiltering(state) {
- 	return state.personal.filtering
-}
-
+/*
 export const getSubjectsWithFiltering = createSelector(
 	[ getSubjects, state => state.personal.filtering ],
 	(subjects, filtering) => {
@@ -36,10 +37,6 @@ export const getSubjectsWithFiltering = createSelector(
 		return subjects
 	}
 )
-
-export function getSorting(state) {
- 	return state.personal.sorting
-}
 
 export const getSubjectsWithFilteringAndSorting = createSelector(
 	[ getSubjectsWithFiltering, state => state.personal.sorting ],
@@ -69,3 +66,4 @@ export const getSubjectsWithFilteringAndSorting = createSelector(
 		return subjects
 	}	
 )
+*/

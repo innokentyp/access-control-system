@@ -10,13 +10,6 @@ import * as actions from '../store/actions/personal'
 import * as selectors from '../store/selectors/personal'
 
 class Personal extends Component {
-	/*
-	state = {
-		numberPerPage: 16,
-    activePage: window.sessionStorage.getItem('personal-active-page') || 1
-	}
-	*/
-
 	sortingOptions = [
 		{ key: '', value: '', text: '( Нет )' },
 		{ key: 'id', value: 'id', text: 'ID' },
@@ -25,16 +18,42 @@ class Personal extends Component {
 		{ key: 'updated_at', value: 'updated_at', text: 'Изменён' }  
 	]
 
-	componentWillUnmount() {
-		//window.sessionStorage.setItem('personal-active-page', this.state.activePage)
+	constructor(props) {
+		super(props)
+
+		this.state = { disabledButton: true }
+		this.inputFiltering = React.createRef()
 	}
 
-	filteringChange = (e, { value }) => {
-		this.props.actions.setFiltering(value)
+	filteringChange = (e) => {
+		this.setState({ disabledButton: false }) 
+	}
+
+	filteringClick = (e) => {
+		const query = { ...this.props.query }
+		const filtering = this.inputFiltering.current.inputRef.value.trim()
+
+		if (filtering) {
+			query.name_like = filtering
+		} else {
+			delete query.name_like
+		}	
+		
+		this.props.actions.requestSubjects(query)
+
+		this.setState({ disabledButton: true })
 	}
 
 	sortingChange = (e, { value }) => {
-		this.props.actions.setSorting(value)
+		const query = { ...this.props.query }
+
+		if (value) { 
+			query._sort = value
+		} else {
+			delete query._sort
+		}	
+
+		this.props.actions.requestSubjects(query)
 	}
 
 	addClick = (e, { name }) => {
@@ -43,17 +62,23 @@ class Personal extends Component {
 	}
 
 	refreshClick = (e, { name }) => {
-		this.props.actions.requestSubjects(this.props.activePage, this.props.numberPerPage)
+		this.props.actions.requestSubjects({ ...this.props.query })
 	}
 
-	sort = column => () => {
-		this.props.actions.setSorting(column)
+	sort = column => (e) => {
+		const query = { ...this.props.query }
+
+		if (column) { 
+			query._sort = column
+		} else {
+			delete query._sort
+		}	
+
+		this.props.actions.requestSubjects(query)
 	}
 
 	pageChange = (e, { activePage }) => {
-		//this.setState({ activePage })
-
-		this.props.actions.requestSubjects(activePage, this.props.numberPerPage)
+		this.props.actions.requestSubjects({ ...this.props.query, _page: activePage })
 	}
 
 	itemClick = id => e => {
@@ -61,22 +86,20 @@ class Personal extends Component {
 	}
 
 	render() {
-		const { match, subjects, filtering, sorting: column, numberPerPage } = this.props
-		var { activePage } = this.props
-		//var { numberPerPage, activePage } = this.state
+		const { match, location, subjects } = this.props
 
-		const totalPages = Math.ceil(/*subjects.length*/21 / numberPerPage) // !!! SAMOPAL
-		if (activePage > totalPages) activePage = totalPages
+		// http://localhost:8000/subjects?name_like=45&_sort=name&_page=1&_limit=6
+		const { _page: activePage, _limit: numberPerPage, name_like: filtering = '', _sort: column = '' } = this.props.query
 
-		const start = (activePage - 1) * numberPerPage
+		const [ totalPages, start ] = [ Math.ceil(4096 / numberPerPage), (activePage - 1) * numberPerPage ] 
 
 		return (
 			<Container as="section">
-				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
+				<h3>{this.constructor.name} match <code>{match.url}</code> for <code>{location.pathname}</code></h3>
 
 				<Menu secondary stackable>
 					<Menu.Item style={{ padding: '11px 0' }}>
-            <Input icon="filter" iconPosition="left" placeholder="Фильтр..." value={filtering} onChange={this.filteringChange} />
+            <Input ref={this.inputFiltering} action={{ disabled: this.state.disabledButton, color: 'teal', icon: 'filter', onClick: this.filteringClick }} placeholder="Фильтр..." defaultValue={filtering} onChange={this.filteringChange} />
           </Menu.Item>
 					<Dropdown item placeholder="Сортировка" options={this.sortingOptions} value={column} onChange={this.sortingChange} />
 					
@@ -99,10 +122,10 @@ class Personal extends Component {
 
 			    <Table.Body>
 			    	{
-			    		subjects/*.slice(start, start + numberPerPage)*/.map(
+			    		subjects.map(
 			    			(item, i) => (
 			    				<Table.Row key={item.id}>
-				    				<Table.Cell>{`0${start + (i + 1)}`.slice(-2)}</Table.Cell>
+				    				<Table.Cell>{`000${start + (i + 1)}`.slice(-4)}</Table.Cell>
 				    				<Table.Cell style={{ fontFamily: 'monospace' }}><Link to={`${match.url}/${item.id}`} onClick={this.itemClick(item.id)}>{item.id}</Link></Table.Cell>
 				    				<Table.Cell>{item.name ? item.name : '(Нет)'}</Table.Cell>
 				    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
@@ -124,7 +147,7 @@ class Personal extends Component {
 							    nextItem={{ content: <Icon name='angle right' />, icon: true, disabled: activePage === totalPages }}
 							    lastItem={{ content: <Icon name='angle double right' />, icon: true, disabled: activePage === totalPages }}
 							    totalPages={totalPages}
-							    onPageChange={this.pageChange} 	        		 
+							    onPageChange={this.pageChange}
 			        	/>
 			        </Table.HeaderCell>
 			      </Table.Row>
@@ -138,13 +161,8 @@ class Personal extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			subjects:  selectors.getSubjects(state), // selectors.getSubjectsWithFilteringAndSorting(state),
-
-			filtering: selectors.getFiltering(state),
-			sorting: selectors.getSorting(state),
-
-			numberPerPage: state.personal.limit,
-			activePage: state.personal.page			
+			query: selectors.getQuery(state),
+			subjects: selectors.getSubjects(state)				
 		}
 	), 
 	dispatch => (

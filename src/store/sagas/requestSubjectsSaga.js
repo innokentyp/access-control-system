@@ -5,18 +5,16 @@ import * as types from '../constants'
 
 function* fetchSubjects(action) {
   try {
-    // http://localhost:8000/subjects?name_like=45&_sort=name&_page=1&_limit=6
-
     const response = yield call(
     	axios.get, 
     	'http://localhost:8000/subjects', 
     	{ 
-        params: { _page: action.activePage, _limit: action.numberPerPage },
+        params: { ...action.query },
     		headers: { 'Authorization': `Bearer ${yield select((state) => state.authentication.user.jwt)}` } 
     	}
     )
 
-    yield put({ type: types.SUBJECTS_FETCHED, subjects: response.data, at: Date.now(), page: action.activePage, limit: action.numberPerPage })
+    yield put({ type: types.SUBJECTS_FETCHED, query: action.query, subjects: response.data, at: Date.now() })
   } catch (e) {   
     console.log(e.message) 
   }
