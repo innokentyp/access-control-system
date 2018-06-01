@@ -2,14 +2,18 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Breadcrumb, Segment, Button } from 'semantic-ui-react'
+import { Container, Breadcrumb, Segment, Button, Icon } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/personal_editor'
 import { getSubject } from '../store/selectors/personal_editor'
 
 class PersonalEditor extends Component {
+	state = {
+		updated: false
+	}
+
 	allClick = (e) => {
-		window.sessionStorage.removeItem('subjects-selected-id')
+		
 	}
 
 	saveClick = (e) => {
@@ -48,7 +52,7 @@ class PersonalEditor extends Component {
 
 					<p>{subject.created_at.toLocaleString('ru-RU')} / {subject.updated_at.toLocaleString('ru-RU')}</p>
 
-					<Button onClick={this.saveClick}>Save</Button>
+					<Button positive disabled={!this.state.updated} onClick={this.saveClick}><Icon name="checkmark" /> Записать</Button>
 				</Segment>
 				
 				<Button onClick={this.backClick}>Back</Button>

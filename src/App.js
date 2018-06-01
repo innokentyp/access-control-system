@@ -35,6 +35,7 @@ class App extends Component {
           <PrivateRoute path='/archive' component={Archive} />
           <PrivateRoute path='/structure' component={Structure} />
           <PrivateRoute path='/personal' exact component={Personal} />
+          <PrivateRoute path='/personal/new' component={NoMatch} />
           <PrivateRoute path='/personal/:id' component={PersonalEditor} />
           <PrivateRoute path='/access' component={Access} />
           <PrivateRoute path='/accounting' component={Accounting} />

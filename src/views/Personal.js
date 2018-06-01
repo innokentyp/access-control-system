@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { Container, Menu, Input, Dropdown, Table, Icon, Pagination } from 'semantic-ui-react'
+import { Container, Menu, Input, Dropdown, Table, Icon, Pagination, Button } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/personal'
 import * as selectors from '../store/selectors/personal'
@@ -23,6 +23,10 @@ class Personal extends Component {
 
 		this.state = { disabledButton: true }
 		this.inputFiltering = React.createRef()
+	}
+
+	componentWillMount() {
+		window.sessionStorage.removeItem('subjects-selected-id')
 	}
 
 	filteringChange = (e) => {
@@ -56,8 +60,8 @@ class Personal extends Component {
 		this.props.actions.requestSubjects(query)
 	}
 
-	addClick = (e, { name }) => {
-		console.log(name)
+	addClick = (e, data) => {
+		console.dir(data)
 
 	}
 
@@ -85,13 +89,15 @@ class Personal extends Component {
 		window.sessionStorage.setItem('subjects-selected-id', id)
 	}
 
+	// http://localhost:8000/places/1w18g4bzsoe2f6ue?_embed=places
+
 	render() {
 		const { match, location, subjects } = this.props
 
 		// http://localhost:8000/subjects?name_like=45&_sort=name&_page=1&_limit=6
 		const { _page: activePage, _limit: numberPerPage, name_like: filtering = '', _sort: column = '' } = this.props.query
 
-		const [ totalPages, start ] = [ Math.ceil(4096 / numberPerPage), (activePage - 1) * numberPerPage ] 
+		const totalPages = subjects.length < numberPerPage ? activePage : activePage + 1 // Math.ceil(4096 / numberPerPage)
 
 		return (
 			<Container as="section">
@@ -104,7 +110,6 @@ class Personal extends Component {
 					<Dropdown item placeholder="Сортировка" options={this.sortingOptions} value={column} onChange={this.sortingChange} />
 					
 					<Menu.Menu position="right">
-						<Menu.Item name="add" onClick={this.addClick}>Новая запись</Menu.Item>
 						<Menu.Item name="refresh" onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Menu.Item>
 					</Menu.Menu>
 				</Menu>
@@ -125,7 +130,7 @@ class Personal extends Component {
 			    		subjects.map(
 			    			(item, i) => (
 			    				<Table.Row key={item.id}>
-				    				<Table.Cell>{`000${start + (i + 1)}`.slice(-4)}</Table.Cell>
+				    				<Table.Cell>{`000${(activePage - 1) * numberPerPage + (i + 1)}`.slice(-4)}</Table.Cell>
 				    				<Table.Cell style={{ fontFamily: 'monospace' }}><Link to={`${match.url}/${item.id}`} onClick={this.itemClick(item.id)}>{item.id}</Link></Table.Cell>
 				    				<Table.Cell>{item.name ? item.name : '(Нет)'}</Table.Cell>
 				    				<Table.Cell>{item.created_at.toLocaleString('ru-RU')}</Table.Cell>
@@ -141,18 +146,20 @@ class Personal extends Component {
 			        <Table.HeaderCell />
 			        <Table.HeaderCell colSpan='4' textAlign='center'>
 			        	<Pagination 
-			        		activePage={activePage}							    
+			        		activePage={activePage}
 							    firstItem={{ content: <Icon name='angle double left' />, icon: true, disabled: activePage === 1 }}
 							    prevItem={{ content: <Icon name='angle left' />, icon: true, disabled: activePage === 1 }}
 							    nextItem={{ content: <Icon name='angle right' />, icon: true, disabled: activePage === totalPages }}
-							    lastItem={{ content: <Icon name='angle double right' />, icon: true, disabled: activePage === totalPages }}
-							    totalPages={totalPages}
+							    lastItem={null}				
+							    totalPages={totalPages}			    							    
 							    onPageChange={this.pageChange}
 			        	/>
 			        </Table.HeaderCell>
 			      </Table.Row>
 			    </Table.Footer>
 			  </Table>
+
+		  	<Button as={Link} to={`${match.url}/new`} basic><Icon name="plus" color="green" /> Новая</Button>			  
 			</Container>
 		)
 	}
