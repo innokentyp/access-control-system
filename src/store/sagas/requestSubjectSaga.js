@@ -9,7 +9,7 @@ function* fetchSubject(action) {
     	axios.get, 
     	`http://localhost:8000/subjects/${action.id}`, 
     	{ 
-        params: { _embed: 'photos' },    		
+        params: { },    		
     		headers: { 'Authorization': `Bearer ${yield select((state) => state.authentication.user.jwt)}` } 
     	}
     )

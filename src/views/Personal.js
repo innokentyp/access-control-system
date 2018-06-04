@@ -11,11 +11,11 @@ import * as selectors from '../store/selectors/personal'
 
 class Personal extends Component {
 	sortingOptions = [
-		{ key: '', value: '', text: '( Нет )' },
-		{ key: 'id', value: 'id', text: 'ID' },
-		{ key: 'name', value: 'name', text: 'Название' },
-		{ key: 'created_at', value: 'created_at', text: 'Зарегистрирован' },
-		{ key: 'updated_at', value: 'updated_at', text: 'Изменён' }  
+		{ key: '', value: '', order: '', text: '( Нет )' },
+		{ key: 'id', value: 'id', order: '', text: 'ID' },
+		{ key: 'name', value: 'name', order: '', text: 'Название' },
+		{ key: 'created_at', value: 'created_at,name', order: 'desc,asc', text: 'Зарегистрирован' },
+		{ key: 'updated_at', value: 'updated_at,name', order: 'desc,asc', text: 'Изменён' }  
 	]
 
 	constructor(props) {
@@ -48,13 +48,32 @@ class Personal extends Component {
 		this.setState({ disabledButton: true })
 	}
 
-	sortingChange = (e, { value }) => {
+	sortingChange = (e, { value, options }) => {
 		const query = { ...this.props.query }
 
-		if (value) { 
-			query._sort = value
+		if (value) {
+			if (query._sort === value) {
+				if (query._order === 'desc,asc')
+					delete query._order
+				else 
+					query._order = 'desc,asc'
+			} else {
+				query._sort = value
+				
+				try {
+					const order = options[options.findIndex(item => item.value === value)].order				
+
+					if (order)
+						query._order = order
+					else
+						delete query._order
+				} catch (e) {
+					console.log(e.message)
+				}
+			}
 		} else {
 			delete query._sort
+			delete query._order
 		}	
 
 		this.props.actions.requestSubjects(query)
@@ -73,9 +92,28 @@ class Personal extends Component {
 		const query = { ...this.props.query }
 
 		if (column) { 
-			query._sort = column
+			if (query._sort === column) {
+				if (query._order === 'desc,asc')
+					delete query._order
+				else
+					query._order = 'desc,asc'
+			} else {
+				query._sort = column
+
+				try {
+					const order = this.sortingOptions[this.sortingOptions.findIndex(item => item.value === column)].order				
+
+					if (order)
+						query._order = order
+					else
+						delete query._order
+				} catch (e) {
+					console.log(e.message)
+				}
+			}
 		} else {
 			delete query._sort
+			delete query._order
 		}	
 
 		this.props.actions.requestSubjects(query)
@@ -89,13 +127,16 @@ class Personal extends Component {
 		window.sessionStorage.setItem('subjects-selected-id', id)
 	}
 
+	// http://localhost:8000/subjects?name_like=45&_sort=name&_page=1&_limit=6
+	// http://localhost:8000/places?placeId=false&_embed=places
 	// http://localhost:8000/places/1w18g4bzsoe2f6ue?_embed=places
+	// http://localhost:8000/places/1w2zr26tti9mhm83?_embed=subjects
+	// http://localhost:8000/subjects/1w18g4c0g7ji9txs?_expand=place
+	// http://localhost:8000/subjects?_sort=created_at&_order=desc,asc
 
 	render() {
 		const { match, location, subjects } = this.props
-
-		// http://localhost:8000/subjects?name_like=45&_sort=name&_page=1&_limit=6
-		const { _page: activePage, _limit: numberPerPage, name_like: filtering = '', _sort: column = '' } = this.props.query
+		const { _page: activePage, _limit: numberPerPage, name_like: filtering = '', _sort: column = '', _order: order = 'asc' } = this.props.query
 
 		const totalPages = subjects.length < numberPerPage ? activePage : activePage + 1 // Math.ceil(4096 / numberPerPage)
 
@@ -118,10 +159,10 @@ class Personal extends Component {
 			    <Table.Header>
 			      <Table.Row>
 			        <Table.HeaderCell collapsing onClick={this.sort('')} />
-			        <Table.HeaderCell width={3} sorted={column === 'id' ? 'ascending' : null} onClick={this.sort('id')}>ID</Table.HeaderCell>
-			        <Table.HeaderCell sorted={column === 'name' ? 'ascending' : null} onClick={this.sort('name')}>Название</Table.HeaderCell>
-			        <Table.HeaderCell width={3} sorted={column === 'created_at' ? 'ascending' : null} onClick={this.sort('created_at')}>Зарегистрирован</Table.HeaderCell>
-			        <Table.HeaderCell width={3} sorted={column === 'updated_at' ? 'ascending' : null} onClick={this.sort('updated_at')}>Изменён</Table.HeaderCell>
+			        <Table.HeaderCell width={3} sorted={column === 'id' ? (order === 'asc' ? 'ascending' : 'descending') : null} onClick={this.sort('id')}>ID</Table.HeaderCell>
+			        <Table.HeaderCell sorted={column === 'name' ? (order === 'asc' ? 'ascending' : 'descending') : null} onClick={this.sort('name')}>Название</Table.HeaderCell>
+			        <Table.HeaderCell width={3} sorted={column === 'created_at,name' ? (order === 'asc' ? 'ascending' : 'descending') : null} onClick={this.sort('created_at,name')}>Зарегистрирован</Table.HeaderCell>
+			        <Table.HeaderCell width={3} sorted={column === 'updated_at,name' ? (order === 'asc' ? 'ascending' : 'descending') : null} onClick={this.sort('updated_at,name')}>Изменён</Table.HeaderCell>
 			      </Table.Row>
 			    </Table.Header>
 
@@ -159,7 +200,7 @@ class Personal extends Component {
 			    </Table.Footer>
 			  </Table>
 
-		  	<Button as={Link} to={`${match.url}/new`} basic><Icon name="plus" color="green" /> Новая</Button>			  
+		  	<Button as={Link} to={`${match.url}/new`}>Новая запись</Button>			  
 			</Container>
 		)
 	}
