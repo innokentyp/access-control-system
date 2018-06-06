@@ -2,8 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Breadcrumb, Segment, Form, Button, Icon } from 'semantic-ui-react'
-import axios from 'axios'
+import { Container, Breadcrumb, Segment, Form, Button, Icon, Message } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/personal_editor'
 import { getSubject } from '../store/selectors/personal_editor'
@@ -15,6 +14,9 @@ class PersonalEditor extends Component {
 		const { subject } = props
 
 		this.state = {
+			loading: false,
+			error: null,
+
 			name: subject.name,
 			photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
 			updated: false
@@ -22,14 +24,15 @@ class PersonalEditor extends Component {
 	}
 
 	UNSAFE_componentWillReceiveProps(nextProps) {
-		console.log('UNSAFE_componentWillReceiveProps')
-
 		const { subject } = nextProps
 
 		this.setState( 
 			{
+				loading: false, 
+
 				name: subject.name,
-				photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null
+				photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
+				updated: false
 			}
 		)
 	}
@@ -40,31 +43,40 @@ class PersonalEditor extends Component {
 
 	formSubjectSubmit = (e) => {
 		e.preventDefault()
+
+		this.setState({ loading: true, error: null })
 		
     const data = { 
 			name: this.state.name,
-			photos: this.state.photo ? [ this.state.photo ] : [] 
+			updated_at: (new Date()).toString() 
 		}
 
-		axios.patch(
-			`http://localhost:8000/subjects/${this.props.match.params.id}`,
-			data,
+		if (this.state.photo !== ((this.props.subject.photos && this.props.subject.photos.length) ? this.props.subject.photos[0] : null)) {
+			data.photos = this.state.photo ? [ this.state.photo ] : []
+		}
+
+		this.props.actions.patch(this.props.match.params.id, data)
+			.catch(
+			  error => {
+			  	this.setState({ loading: false, error })				    
+			  }
+		  )    
+	}
+
+	formSubjectReset = (e) => {
+		e.preventDefault()
+
+		const { subject } = this.props
+
+		this.setState(
 			{
-      	headers: {
-      		'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.props.jwt}`
-      	}    		
+				error: null,
+
+				name: subject.name,
+				photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
+				updated: false
 			}
-		).then(
-			response => {
-				console.log(response.data)
-			}
-		).catch (
-		  error => {
-		  	console.log(error.message)				    
-		  }
-	  )
-    
+		)
 	}
 		
 	subjectNameChange = (e) => {
@@ -72,28 +84,28 @@ class PersonalEditor extends Component {
 	}
 
 	subjectPhotoChange = (e) => {
-		console.log('subjectPhotoChange')
-
 		e.preventDefault()
 
+		if (e.target.files.length < 1) return
+
     const reader = new FileReader()
-    
+        
     reader.onloadend = () => {
       this.setState({ photo: reader.result, updated: true })
-    }
+    }		
 
-    reader.readAsDataURL(e.target.files[0])		
+    reader.readAsDataURL(e.target.files[0])
+	}
+
+	selectPhoto = (e) => {
+		this.inputPhoto.click()
 	}
 
 	clearPhoto = (e) => {
 		this.inputPhoto.value = ''
 		
 		this.setState({ photo: null, updated: true })
-	}
-
-	backClick = (e) => {
-		this.props.history.goBack()
-	}
+	}	
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
@@ -110,37 +122,61 @@ class PersonalEditor extends Component {
 
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>
 
-				<Segment>
-					<Form name="form-subject" onSubmit={this.formSubjectSubmit} autoComplete="off">
-						<Form.Field>
-			      	<label htmlFor="form-subject-name">Название:</label>
-			      	<input type="text" name="subject-name" id="form-subject-name" value={this.state.name} onChange={this.subjectNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
-			      </Form.Field>
-					
-						<p>{subject.name ? subject.name : subject.id}</p>
+				<Segment vertical>
+					<Form name="form-subject" id="form-subject-id" loading={this.state.loading} error={!!this.state.error} onSubmit={this.formSubjectSubmit} onReset={this.formSubjectReset} autoComplete="off">
+						<Form.Group inline>
+			      	<Form.Field as="label" width={4} htmlFor="form-subject-name">Название</Form.Field>
+			      	<Form.Field width={12}>
+			      		<input type="text" name="subject-name" id="form-subject-name" value={this.state.name} onChange={this.subjectNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      	</Form.Field>
+			      </Form.Group>	
 						
-						<Form.Field>
-							<img 
-								src={this.state.photo ? this.state.photo : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII='} 
-								width="200" 
-								height="150" 
-								style={{ borderRadius: '4px', padding: '4px', backgroundColor: 'lightsteelblue', objectFit: 'contain' }} 
-								alt={subject.id}
-							/>
-											
-							<input type="file" accept="image/*" name="photo" ref={input => this.inputPhoto = input} onChange={this.subjectPhotoChange} />
-						</Form.Field>
+						<Form.Group>
+							<Form.Field width={4}><label>Фотоснимок</label></Form.Field>
+							<Form.Field width={12} style={{ paddingLeft: '3px' }}>
+								<img 
+									src={this.state.photo ? this.state.photo : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII='} 
+									width="200" 
+									height="150" 
+									style={{ borderRadius: '4px', padding: '4px', backgroundColor: 'lightsteelblue', objectFit: 'contain' }} 
+									alt={subject.id}
+								/>
+												
+								<input type="file" accept="image/*" name="photo" ref={input => this.inputPhoto = input} onChange={this.subjectPhotoChange} hidden />
+								<br />
+								
+								<Button type="button" onClick={this.selectPhoto} primary>Выберите файл</Button>
+								<Button type="button" onClick={this.clearPhoto} disabled={!this.state.photo}>Очистить</Button>							
+							</Form.Field>							
+						</Form.Group>
 
-						<Button type="button" onClick={this.clearPhoto}>Очистить</Button>
+						<Form.Group inline>
+							<Form.Field as="label" width={4}>Зарегистрирован</Form.Field>
+							<Form.Field as="span" width={12}>{subject.created_at.toLocaleString('ru-RU')}</Form.Field>
+						</Form.Group>
 
-						<p>{subject.created_at.toLocaleString('ru-RU')} / {subject.updated_at.toLocaleString('ru-RU')}</p>
-						<p>{subject.placeId}</p>
+						<Form.Group inline>
+							<Form.Field as="label" width={4}>Изменён</Form.Field>
+							<Form.Field as="span" width={12}>{subject.updated_at.toLocaleString('ru-RU')}</Form.Field>
+						</Form.Group>
 
-						<Button type="submit" positive disabled={!this.state.updated}><Icon name="checkmark" /> Записать</Button>
+						<Form.Group inline>
+							<Form.Field as="label" width={4}>Находится в</Form.Field>
+							<Form.Field as="span" width={12}>{subject.placeId}</Form.Field>
+						</Form.Group>
+
+						<Message
+				      error
+				      header="Ошибка при записи изменений"
+				      content={(this.state.error && this.state.error.message) ? this.state.error.message : 'Нет сообщения'}
+				    />
 					</Form>
 				</Segment>
-				
-				<Button onClick={this.backClick}>Back</Button>
+
+				<Segment vertical>
+					<Button form="form-subject-id" type="submit" positive disabled={!this.state.updated}><Icon name="checkmark" /> Записать</Button>
+					<Button form="form-subject-id" type="reset"><Icon name="refresh" /> Обновить</Button>
+				</Segment>				
 			</Container>
 		)
 	}	
