@@ -18,7 +18,7 @@ class PersonalEditor extends Component {
 			error: null,
 
 			name: subject.name,
-			photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
+			photo: subject.photos.length ? subject.photos[0] : null,
 			updated: false
 		}
 	}
@@ -31,7 +31,7 @@ class PersonalEditor extends Component {
 				loading: false, 
 
 				name: subject.name,
-				photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
+				photo: subject.photos.length ? subject.photos[0] : null,
 				updated: false
 			}
 		)
@@ -51,7 +51,7 @@ class PersonalEditor extends Component {
 			updated_at: (new Date()).toString() 
 		}
 
-		if (this.state.photo !== ((this.props.subject.photos && this.props.subject.photos.length) ? this.props.subject.photos[0] : null)) {
+		if (this.state.photo !== (this.props.subject.photos.length ? this.props.subject.photos[0] : null)) {
 			data.photos = this.state.photo ? [ this.state.photo ] : []
 		}
 
@@ -73,7 +73,7 @@ class PersonalEditor extends Component {
 				error: null,
 
 				name: subject.name,
-				photo: (subject.photos && subject.photos.length) ? subject.photos[0] : null,
+				photo: subject.photos.length ? subject.photos[0] : null,
 				updated: false
 			}
 		)
@@ -162,7 +162,7 @@ class PersonalEditor extends Component {
 
 						<Form.Group inline>
 							<Form.Field as="label" width={4}>Находится в</Form.Field>
-							<Form.Field as="span" width={12}>{subject.placeId}</Form.Field>
+							<Form.Field as="span" width={12}>{subject.place.name}</Form.Field>
 						</Form.Group>
 
 						<Message
@@ -185,8 +185,7 @@ class PersonalEditor extends Component {
 export default connect(
 	(state, props) => (
 		{
-			subject: getSubject(state, props.match.params.id),
-			jwt: state.authentication.user.jwt
+			subject: getSubject(state, props.match.params.id)
 		}
 	),
 	dispatch => (

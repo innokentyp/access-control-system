@@ -11,6 +11,12 @@ export const preloadedState = {
     user: {}
   },
 
+  structure: {
+    roots: [],
+    places: {},
+    at: 0
+  },
+
   personal: {
     query: {
       _page: 1,
@@ -33,6 +39,15 @@ function authentication(state = preloadedState.authentication, action) {
       return { ...state, user: { ...action.user } }
     case types.LOGGED_OUT:
       return { ...state, user: {} }  
+    default:
+      return state 
+  }
+}
+
+function structure(state = preloadedState.structure, action) {
+  switch (action.type) {    
+    case types.PLACES_FETCHED:
+      return { ...state, roots: action.roots, places: action.places, at: action.at }
     default:
       return state 
   }
@@ -64,4 +79,4 @@ function personal_editor(state = preloadedState.personal_editor, action) {
   }
 }
 
-export default combineReducers({ authentication, personal, personal_editor })
+export default combineReducers({ authentication, structure, personal, personal_editor })
