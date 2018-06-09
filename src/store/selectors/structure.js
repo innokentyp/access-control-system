@@ -3,30 +3,30 @@ import { createSelector } from 'reselect'
 import { _store } from '../'
 import { requestPlaces } from '../actions/structure'
 
-export const getPlaces = createSelector(
-	[ (state, id) => id ? state.structure.places[id].places : state.structure.roots, (state, id) => state.structure.at ],
-	(places, at) => {
-		console.log('getPlaces')
+export const getStructure = createSelector(
+	state => state.structure,
+	structure => {
+		console.log('getStructure')
 
-		at > 0 || _store.dispatch(requestPlaces())
+		structure.at > 0 || _store.dispatch(requestPlaces())
 		
-		return places
+		return structure
 	}	
 )
 
 export const getPlace = createSelector(
-	[ (state, id) => state.structure.places[id], (state, id) => id ],
-	(place, id) => {
+	[ (state, id) => state.structure.places[id], (state, id) => state.structure.at, (state, id) => id ],
+	(place, at, id) => {
 		console.log(`getPlace for ${id}`)
 
 		if (place) {
 			return { ...place }
 		} else {
-			_store.dispatch(requestPlaces())
+			at > 0 || _store.dispatch(requestPlaces())
 			
 			return {
 				id,
-      	name: '',
+      	name: id,
       	maximum_control: 0
       }
 		}

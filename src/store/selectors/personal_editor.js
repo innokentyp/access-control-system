@@ -2,22 +2,25 @@ import { createSelector } from 'reselect'
 
 import { _store } from '../'
 import { requestSubject } from '../actions/personal_editor'
-import { getPlace } from './structure'
+import { getStructure } from './structure'
 
 export const getSubject = createSelector(
-	[(state, id) => state, (state, id) => state.personal_editor.subjects[id], (state, id) => id],
-	(state, subject, id) => {
+	[ (state, id) => getStructure(state).places, (state, id) => state.personal_editor.subjects[id], (state, id) => id ],
+	(places, subject, id) => {
 		console.log(`getSubject for ${id}`)
 
-		if (subject) {
-			const place = getPlace(state, subject.placeId)
+		const emptyPlace = {
+			id: '',
+			name: '(Нет)'
+		}
 
+		if (subject) {
 			return { 
 				id,
 				name: subject.name, 
 				created_at: new Date(subject.created_at), 
 				updated_at: new Date(subject.updated_at),
-				place,
+				place: places[subject.placeId] ? places[subject.placeId] : emptyPlace,
 				photos: (subject.photos && subject.photos.length) ? [ ...subject.photos ] : []
 			}
 		} else {
@@ -28,10 +31,7 @@ export const getSubject = createSelector(
 				name: '',
   			created_at: new Date(),
   			updated_at: new Date(),
-  			place: {
-  				id: '',
-  				name: '(Нет)'
-  			},
+  			place: emptyPlace,
   			photos: []
 			}	
 		}
