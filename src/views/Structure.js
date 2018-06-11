@@ -1,90 +1,93 @@
 import React, { Component, Fragment } from 'react'
+import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Accordion } from 'semantic-ui-react'
+import { Container, List } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
 
-class Structure extends Component {
-	renderItem(id) {
-		const place = this.props.structure.places[id]
+class StructureItem extends Component {
+	constructor(props) {
+		super(props)
 
-		return (
-			place
-			?
-			(
-				<li key={id}>{ place.name }
-					{
-						place.places
-						&&
-						<ul>
-						{
-							place.places.map(
-								(item, i) => this.renderItem(item)
-							)
-						}
-						</ul>
-					}							
-				</li>
-			)
-			:
-			<li key={id}>{id}</li>
-		)	
+		this.state = { expanded: props.expanded }
+
+		this._expanded = props.expanded
+	}
+	
+	listIconClick = e => {
+		const { expanded } = this.state
+
+		this.setState({ expanded: !expanded })
+
+		expanded && (this._expanded = false)
 	}
 
-	getPanels(places) {
-		return places.map(
-			(id, i) => {
-				const place = this.props.structure.places[id]
-
-				return (
-					place
-					?
-					{
-						title: place.name, 
-						content: { 
-							content: (
-								<Fragment>
-									Время повторного входа: <strong>{place.maximum_control}</strong>
-
-									{ place.places && <Accordion.Accordion panels={this.getPanels(place.places)} /> }
-								</Fragment>
-							), 
-							key: id 
-						}
-					}
-					:
-					{
-						title: id, 
-						content: {
-							content: 'Place not found',
-							key: id
-						}	
-					}
-				)				 
-			}
-		)
+	placeClick = e => {
+		window.sessionStorage.setItem('places-selected-id', this.props.placeId)
 	}
 
 	render() {
-		const { roots } = this.props.structure
+		const { placeId: id, places, url, selected } = this.props		
+		const place = places[id] || { id, name: id, maximum_control: 0 }
+
+		const { expanded } = this.state
+
+		return (
+			<List.Item key={id}>
+				{
+					place.places
+					?
+					<Fragment>
+						<List.Icon name={`${expanded ? 'down' : 'right'} triangle`} style={{ cursor: expanded ? 'default' : 'pointer' }} onClick={this.listIconClick} 
+						/>						
+						<List.Content>
+			        <Link to={`${url}/${id}`} style={{ fontWeight: id === selected ? 'bolder' : 'normal' }} onClick={this.placeClick}>{ place.name }</Link>
+			        {
+			        	expanded
+			        	&& 
+				        <List.List>
+									{
+										place.places.map(
+											(item, i) => <StructureItem key={item} placeId={item} places={places} expanded={this._expanded ? (i === 0) : false} url={url} selected={selected} />
+										)
+									}
+								</List.List>
+							}				
+			      </List.Content>
+					</Fragment>
+					:
+					<Link to={`${url}/${id}`} style={{ marginLeft: '16px', fontWeight: id === selected ? 'bolder' : 'normal' }} onClick={this.placeClick}>{ place.name }</Link>
+				}			
+			</List.Item>
+		)
+	}
+}
+
+class Structure extends Component {
+	render() {
+		const { roots, places } = this.props.structure
+		const { match, location } = this.props
+
+		var selected = ''
+		{
+			const match = location.pathname.match(new RegExp('structure/(\\w+)$'))
+	
+			if (match && match[1]) selected = match[1]
+		} 
 
 		return (
 			<Container as="section">
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>	
-				
-				<Accordion defaultActiveIndex={0} panels={this.getPanels(roots)} styled />
 
-				<hr />
-
-				<ul>
+				<List>
 					{
 						roots.map(
-							(item, i) => this.renderItem(item)
+							(item, i) => <StructureItem key={item} placeId={item} places={places} expanded={i === 0} url={match.url} selected={selected} />
 						)
 					}
-				</ul>
+				</List>
 			</Container>
 		)
 	}	

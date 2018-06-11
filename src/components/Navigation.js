@@ -20,6 +20,16 @@ class Navigation extends Component {
 		}
 	}
 
+  structureClick = (e, data) => {
+    const id = window.sessionStorage.getItem('places-selected-id')
+
+    if (id) {
+      e.preventDefault()
+
+      this.props.history.push(data.to + '/' + id)
+    }
+  }
+
   personalClick = (e, data) => {
     const id = window.sessionStorage.getItem('subjects-selected-id')
 
@@ -69,6 +79,7 @@ class Navigation extends Component {
           to="/structure"
           active={!!pathname.match(new RegExp('^/structure'))}
           color={colors[3]}
+          onClick={this.structureClick}
         >
           Офис
         </Menu.Item>
