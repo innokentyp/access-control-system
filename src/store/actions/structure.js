@@ -14,3 +14,11 @@ export function placesFetched(roots, places, at) {
 		at
 	}
 }
+
+export function expand(id, value = true) {
+	return {
+		type: types.PLACE_EXPAND,
+		id,
+		value
+	}
+}

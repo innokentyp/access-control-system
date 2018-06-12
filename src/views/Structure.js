@@ -8,20 +8,10 @@ import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
 
 class StructureItem extends Component {
-	constructor(props) {
-		super(props)
-
-		this.state = { expanded: props.expanded }
-
-		this._expanded = props.expanded
-	}
-	
-	listIconClick = e => {
-		const { expanded } = this.state
-
-		this.setState({ expanded: !expanded })
-
-		expanded && (this._expanded = false)
+	listIconClick = place => e => {		
+		const { expand } = this.props.actions
+		
+		expand(place.id, !place.expanded)		
 	}
 
 	placeClick = e => {
@@ -31,26 +21,24 @@ class StructureItem extends Component {
 	render() {
 		const { placeId: id, places, url, selected } = this.props		
 		const place = places[id] || { id, name: id, maximum_control: 0 }
-
-		const { expanded } = this.state
-
+		
 		return (
 			<List.Item key={id}>
 				{
 					place.places
 					?
 					<Fragment>
-						<List.Icon name={`${expanded ? 'down' : 'right'} triangle`} style={{ cursor: expanded ? 'default' : 'pointer' }} onClick={this.listIconClick} 
+						<List.Icon name={`${place.expanded ? 'down' : 'right'} triangle`} style={{ cursor: 'pointer' }} onClick={this.listIconClick(place)} 
 						/>						
 						<List.Content>
 			        <Link to={`${url}/${id}`} style={{ fontWeight: id === selected ? 'bolder' : 'normal' }} onClick={this.placeClick}>{ place.name }</Link>
 			        {
-			        	expanded
+			        	place.expanded
 			        	&& 
 				        <List.List>
 									{
 										place.places.map(
-											(item, i) => <StructureItem key={item} placeId={item} places={places} expanded={this._expanded ? (i === 0) : false} url={url} selected={selected} />
+											(item, i) => <StructureItem key={item} placeId={item} places={places} url={url} selected={selected} actions={this.props.actions} />
 										)
 									}
 								</List.List>
@@ -84,7 +72,7 @@ class Structure extends Component {
 				<List>
 					{
 						roots.map(
-							(item, i) => <StructureItem key={item} placeId={item} places={places} expanded={i === 0} url={match.url} selected={selected} />
+							(item, i) => <StructureItem key={item} placeId={item} places={places} url={match.url} selected={selected} actions={this.props.actions} />
 						)
 					}
 				</List>
