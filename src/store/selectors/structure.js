@@ -3,6 +3,12 @@ import { createSelector } from 'reselect'
 import { _store } from '../'
 import { requestPlaces } from '../actions/structure'
 
+export function placePath(place, value = 'name', path = []) {
+	path.splice(0, 0, place[value]) 
+
+	return place.parent ? placePath(place.parent, value, path) : path 
+}
+
 export const getStructure = createSelector(
 	state => state.structure,
 	structure => {

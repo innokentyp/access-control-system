@@ -15,8 +15,16 @@ function* fetchPlaces(action) {
     	}
     )
 
-    const place = new schema.Entity('places')
-    place.define({ places: new schema.Array(place) })
+    const place = new schema.Entity('places', {}, 
+      {
+        processStrategy: (value, parent, key) => {
+          if (parent.id) value.parent = parent          
+
+          return value
+        }
+      }
+    )
+    place.define({ places: [ place ] })
 
     const normalizedData = normalize(response.data, [ place ])
 

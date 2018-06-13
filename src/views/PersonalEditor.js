@@ -2,10 +2,11 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Breadcrumb, Segment, Form, Button, Icon, Message } from 'semantic-ui-react'
+import { Container, Breadcrumb, Segment, Form, Button, Icon, Message, List } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/personal_editor'
 import { getSubject } from '../store/selectors/personal_editor'
+import { placePath } from '../store/selectors/structure'
 
 class PersonalEditor extends Component {
 	constructor(props) {
@@ -162,7 +163,17 @@ class PersonalEditor extends Component {
 
 						<Form.Group inline>
 							<Form.Field as="label" width={4}>Находится в</Form.Field>
-							<Form.Field as="span" width={12}>{subject.place.name}</Form.Field>
+							<Form.Field width={12}>
+								<List bulleted horizontal>
+								{ 
+									placePath(subject.place).map(
+										(item, i, array) => (
+											<List.Item key={i}>{i < array.length - 1 ? item : <Link to={`/structure/${subject.place.id}`}>{item}</Link>}</List.Item>											
+										)
+									)
+								}							    
+							  </List>
+							</Form.Field>
 						</Form.Group>
 
 						<Message
