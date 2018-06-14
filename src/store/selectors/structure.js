@@ -9,6 +9,13 @@ export function placePath(place, value = 'name', path = []) {
 	return place.parent ? placePath(place.parent, value, path) : path 
 }
 
+export function isParent(place, id) {
+	if (place.id === id)
+		return true
+	else
+		return place.parent ? isParent(place.parent, id) : false 
+}
+
 export const getStructure = createSelector(
 	state => state.structure,
 	structure => {
@@ -21,20 +28,16 @@ export const getStructure = createSelector(
 )
 
 export const getPlace = createSelector(
-	[ (state, id) => state.structure.places[id], (state, id) => state.structure.at, (state, id) => id ],
-	(place, at, id) => {
+	[ (state, id) => state.structure, (state, id) => id ],
+	(structure, id) => {
 		console.log(`getPlace for ${id}`)
 
-		if (place) {
-			return { ...place }
-		} else {
-			at > 0 || _store.dispatch(requestPlaces())
-			
-			return {
-				id,
-      	name: id,
-      	maximum_control: 0
-      }
-		}
+		structure.at > 0 || _store.dispatch(requestPlaces())
+
+		return structure.places[id] || {
+			id,
+    	name: id,
+    	maximum_control: 0
+    }		
 	}	
 )

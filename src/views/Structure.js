@@ -7,36 +7,42 @@ import { Container, Grid, List } from 'semantic-ui-react'
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
 
-class StructureItem extends Component {
+class _StructureItem extends Component {
 	constructor(props) {
 		super(props)
 
-		this.selectedPath = props.selectedPath
+		this.isParent = selectors.isParent(props.selected, props.placeId)
 	}
 
 	listIconClick = place => e => {		
-		const { expand } = this.props.actions
+		const { actions: { expand } } = this.props
 
-		this.selectedPath = []		
+		this.isParent = false		
+
 		expand(place.id, !place.expanded)		
 	}	
 
 	render() {
-		const { placeId: id, places, url, selected, actions } = this.props
-		const selectedPath = this.selectedPath		
-		const place = places[id] || { id, name: id, maximum_control: 0 }
-		const expanded = place.expanded || selectedPath.includes(id)
+		const { placeId: id, structure: { places }, selected } = this.props
+
+		const place = places[id] || {
+			id,
+    	name: id,
+    	maximum_control: 0
+    }
+				
+		const expanded = place.expanded || this.isParent
 		
 		return (
 			<List.Item key={id}>
 				<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ cursor: 'pointer', visibility: place.places ? 'visible' : 'hidden' }} onClick={this.listIconClick(place)} />						
 				<List.Content>
 					{
-						id === selected
+						id === selected.id
 						?
 						place.name
 						:
-						<Link to={`${url}/${id}`}>{ place.name }</Link>
+						<Link to={`/structure/${id}`}>{ place.name }</Link>
 					}	        
 	        {
 	        	(place.places && expanded)
@@ -44,7 +50,7 @@ class StructureItem extends Component {
 		        <List.List>
 							{
 								place.places.map(
-									(item, i) => <StructureItem key={item} placeId={item} places={places} url={url} selected={selected} selectedPath={selectedPath} actions={actions} />
+									(item, i) => <StructureItem key={item} placeId={item} selected={selected} />
 								)
 							}
 						</List.List>
@@ -55,25 +61,41 @@ class StructureItem extends Component {
 	}
 }
 
-class Structure extends Component {
-	render() {
-		const { match, location, actions, structure: { roots, places } } = this.props
-		
-		var selected = ''
-		var selectedPath = []
-		
-		{
-			const match = location.pathname.match(new RegExp('structure/(\\w+)$'))
-		
-			if (match && match[1]) {
-				selected = match[1]
-				selectedPath = places[selected] ? selectors.placePath(places[selected], 'id') : [selected]
-				
-				window.sessionStorage.setItem('places-selected-id', selected)
-			} else 
-				window.sessionStorage.removeItem('places-selected-id')
+const StructureItem = connect(
+	(state, props) => (
+		{ 
+			structure: selectors.getStructure(state)			
 		}
-		
+	), 
+	dispatch => (
+		{ 
+			actions: {
+				expand: (id, value) => { dispatch(actions.expand(id, value)) }
+			}
+		}
+	)
+) (_StructureItem)
+
+class Structure extends Component {
+	state = {}
+	
+	static getDerivedStateFromProps(props, state) {
+		const { id: selected } = props.match.params
+
+		selected
+		?
+		window.sessionStorage.setItem('places-selected-id', selected)
+		: 
+		window.sessionStorage.removeItem('places-selected-id')
+
+		return state
+	}
+
+	render() {
+		console.log(`render: ${this.constructor.name}`)
+
+		const { structure: { roots, places }, selected } = this.props
+				
 		return (
 			<Container as="section">
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>	
@@ -84,13 +106,13 @@ class Structure extends Component {
 							<List>
 								{
 									roots.map(
-										(item, i) => <StructureItem key={item} placeId={item} places={places} url={match.url} selected={selected} selectedPath={selectedPath} actions={actions} />
+										(item, i) => <StructureItem key={item} placeId={item} selected={selected} />
 									)
 								}
 							</List>
 						</Grid.Column>
 						<Grid.Column width={10}>
-							<Route path={`${match.url}/:id`} render={
+							<Route path="/structure/:id" render={
 								props => { 
 									const { id } = props.match.params
 									const place = places[id]
@@ -114,7 +136,8 @@ class Structure extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state)
+			structure: selectors.getStructure(state),
+			selected: selectors.getPlace(state, props.match.params.id)
 		}
 	), 
 	dispatch => (
