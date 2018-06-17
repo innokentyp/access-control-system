@@ -21,12 +21,12 @@ class Navigation extends Component {
 	}
 
   structureClick = (e, data) => {
-    const id = window.sessionStorage.getItem('places-selected-id')
+    const path = window.sessionStorage.getItem('places-selected-path')
 
-    if (id) {
+    if (path) {
       e.preventDefault()
 
-      this.props.history.push(data.to + '/' + id)
+      this.props.history.push(path)
     }
   }
 

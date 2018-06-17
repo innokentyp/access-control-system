@@ -3,17 +3,10 @@ import { createSelector } from 'reselect'
 import { _store } from '../'
 import { requestPlaces } from '../actions/structure'
 
-export function placePath(place, value = 'name', path = []) {
-	path.splice(0, 0, place[value]) 
+export function placePath(place, path = []) {
+	path.splice(0, 0, place) 
 
-	return place.parent ? placePath(place.parent, value, path) : path 
-}
-
-export function isParent(place, id) {
-	if (place.id === id)
-		return true
-	else
-		return place.parent ? isParent(place.parent, id) : false 
+	return place.parent ? placePath(place.parent, path) : path 
 }
 
 export const getStructure = createSelector(

@@ -165,10 +165,10 @@ class PersonalEditor extends Component {
 							<Form.Field as="label" width={4}>Находится в</Form.Field>
 							<Form.Field width={12}>
 								<List bulleted horizontal>
-								{ 
+								{ 	
 									placePath(subject.place).map(
 										(item, i, array) => (
-											<List.Item key={i}>{i < array.length - 1 ? item : <Link to={`/structure/${subject.place.id}`}>{item}</Link>}</List.Item>											
+											<List.Item key={i}>{i < array.length - 1 ? item.name : <Link to={`/structure/${array.map(item => item.id).join('/')}`}>{item.name}</Link>}</List.Item>											
 										)
 									)
 								}							    

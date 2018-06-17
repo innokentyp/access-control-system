@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Link, Route } from 'react-router-dom'
+import { NavLink, Route } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Container, Grid, List } from 'semantic-ui-react'
@@ -7,95 +7,64 @@ import { Container, Grid, List } from 'semantic-ui-react'
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
 
-class _StructureItem extends Component {
-	constructor(props) {
-		super(props)
-
-		this.isParent = selectors.isParent(props.selected, props.placeId)
-	}
-
-	listIconClick = place => e => {		
-		const { actions: { expand } } = this.props
-
-		this.isParent = false		
-
-		expand(place.id, !place.expanded)		
-	}	
-
+class _ListOfPlaces extends Component {
 	render() {
-		const { placeId: id, structure: { places }, selected } = this.props
-
-		const place = places[id] || {
-			id,
-    	name: id,
-    	maximum_control: 0
-    }
-				
-		const expanded = place.expanded || this.isParent
+		const { location: { pathname }, match: { url, params: { id: parentId } }, structure: { places } } = this.props
 		
 		return (
-			<List.Item key={id}>
-				<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ cursor: 'pointer', visibility: place.places ? 'visible' : 'hidden' }} onClick={this.listIconClick(place)} />						
-				<List.Content>
-					{
-						id === selected.id
-						?
-						place.name
-						:
-						<Link to={`/structure/${id}`}>{ place.name }</Link>
-					}	        
-	        {
-	        	(place.places && expanded)
-	        	&& 
-		        <List.List>
-							{
-								place.places.map(
-									(item, i) => <StructureItem key={item} placeId={item} selected={selected} />
-								)
-							}
-						</List.List>
-					}				
-	      </List.Content>
-			</List.Item>
+			<List.List>
+				{
+					places[parentId].places.map(
+						(id, i) => {
+							const place = places[id] || { id, name: id }	
+							const expanded = pathname.includes(id) && place.places	
+
+							return (
+								<List.Item key={id}>
+									<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+									<List.Content>
+										<NavLink to={`${url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
+						        {
+						        	expanded
+						        	&&
+						        	<Route path={`${url}/:id`} component={ListOfPlaces} />
+						        }	
+						      </List.Content>
+								</List.Item>
+							)
+						}
+					)
+				}				
+			</List.List>
 		)
 	}
 }
 
-const StructureItem = connect(
+const ListOfPlaces = connect(
 	(state, props) => (
 		{ 
 			structure: selectors.getStructure(state)			
 		}
-	), 
-	dispatch => (
-		{ 
-			actions: {
-				expand: (id, value) => { dispatch(actions.expand(id, value)) }
-			}
-		}
 	)
-) (_StructureItem)
+) (_ListOfPlaces)
 
 class Structure extends Component {
 	state = {}
 	
 	static getDerivedStateFromProps(props, state) {
-		const { id: selected } = props.match.params
-
-		selected
-		?
-		window.sessionStorage.setItem('places-selected-id', selected)
-		: 
-		window.sessionStorage.removeItem('places-selected-id')
-
+		const { pathname } = props.location		
+		
+		window.sessionStorage.setItem('places-selected-path', pathname)
+		
 		return state
-	}
+	}	
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { structure: { roots, places }, selected } = this.props
-				
+		const { structure: { roots, places }, match, location } = this.props	
+		const path = location.pathname.match(new RegExp('structure/*$')) ? location.pathname + '/:id' : location.pathname.replace(new RegExp('\\w+/*$'), ':id')
+					
 		return (
 			<Container as="section">
 				<h3>{this.constructor.name} match <code>{this.props.match.url}</code> for <code>{this.props.location.pathname}</code></h3>	
@@ -103,16 +72,40 @@ class Structure extends Component {
 				<Grid>
 					<Grid.Row>
 						<Grid.Column width={6}>
-							<List>
-								{
-									roots.map(
-										(item, i) => <StructureItem key={item} placeId={item} selected={selected} />
+							<Route path={match.url} render={
+								props => {
+									return (
+										<List>
+											{
+												roots.map(
+													(id, i) => {
+														const expanded = true
+
+														const place = places[id] || { id, name: id }
+
+														return (
+															<List.Item key={id}>
+																<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ cursor: 'pointer', visibility: place.places ? 'visible' : 'hidden' }} />						
+																<List.Content>
+																	<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
+													        {
+													        	place.places
+													        	&&
+													        	<Route path={`${match.url}/:id`} component={ListOfPlaces} />
+													        }	
+													      </List.Content>
+															</List.Item>
+														)
+													}
+												)
+											}
+										</List>
 									)
 								}
-							</List>
+							} />
 						</Grid.Column>
 						<Grid.Column width={10}>
-							<Route path="/structure/:id" render={
+							<Route path={path} render={
 								props => { 
 									const { id } = props.match.params
 									const place = places[id]
@@ -136,8 +129,7 @@ class Structure extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state),
-			selected: selectors.getPlace(state, props.match.params.id)
+			structure: selectors.getStructure(state)
 		}
 	), 
 	dispatch => (
