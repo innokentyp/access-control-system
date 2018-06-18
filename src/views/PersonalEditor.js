@@ -23,7 +23,26 @@ class PersonalEditor extends Component {
 			updated: false
 		}
 	}
+	/*
+	static getDerivedStateFromProps(props, state) {
+		const { name, photos } = props.subject
+		const photo = photos.length ? photos[0] : null
 
+		if (name !== state.name || photo !== state.photo) {
+			const { loading, error, updated } = state
+
+			return {
+				loading,
+				error,
+				name,
+				photo,
+				updated
+			}
+		}
+		
+		return null
+	}
+	*/
 	UNSAFE_componentWillReceiveProps(nextProps) {
 		const { subject } = nextProps
 
@@ -37,7 +56,7 @@ class PersonalEditor extends Component {
 			}
 		)
 	}
-
+	
 	allClick = (e) => {
 		
 	}
@@ -125,6 +144,11 @@ class PersonalEditor extends Component {
 
 				<Segment vertical>
 					<Form name="form-subject" id="form-subject-id" loading={this.state.loading} error={!!this.state.error} onSubmit={this.formSubjectSubmit} onReset={this.formSubjectReset} autoComplete="off">
+						<Form.Group inline>
+							<Form.Field as="label" width={4}>ID</Form.Field>
+							<Form.Field as="span" width={12}>{subject.id}</Form.Field>
+						</Form.Group>
+
 						<Form.Group inline>
 			      	<Form.Field as="label" width={4} htmlFor="form-subject-name">Название</Form.Field>
 			      	<Form.Field width={12}>

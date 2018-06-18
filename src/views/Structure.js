@@ -7,6 +7,8 @@ import { Container, Grid, List } from 'semantic-ui-react'
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
 
+import PlaceEditor from '../components/PlaceEditor'
+
 class _ListOfPlaces extends Component {
 	render() {
 		const { location: { pathname }, match: { url, params: { id: parentId } }, structure: { places } } = this.props
@@ -56,14 +58,14 @@ class Structure extends Component {
 		
 		window.sessionStorage.setItem('places-selected-path', pathname)
 		
-		return state
+		return null
 	}	
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { structure: { roots, places }, match, location } = this.props	
-		const path = location.pathname.match(new RegExp('structure/*$')) ? location.pathname + '/:id' : location.pathname.replace(new RegExp('\\w+/*$'), ':id')
+		const { structure: { roots, places }, match, location: { pathname } } = this.props	
+		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
 					
 		return (
 			<Container as="section">
@@ -71,53 +73,34 @@ class Structure extends Component {
 
 				<Grid>
 					<Grid.Row>
-						<Grid.Column width={6}>
-							<Route path={match.url} render={
-								props => {
-									return (
-										<List>
-											{
-												roots.map(
-													(id, i) => {
-														const expanded = true
+						<Grid.Column width={6}>							
+							<List>
+								{
+									roots.map(
+										(id, i) => {
+											const place = places[id] || { id, name: id }
+											const expanded = pathname.includes(id) && place.places
 
-														const place = places[id] || { id, name: id }
-
-														return (
-															<List.Item key={id}>
-																<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ cursor: 'pointer', visibility: place.places ? 'visible' : 'hidden' }} />						
-																<List.Content>
-																	<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
-													        {
-													        	place.places
-													        	&&
-													        	<Route path={`${match.url}/:id`} component={ListOfPlaces} />
-													        }	
-													      </List.Content>
-															</List.Item>
-														)
-													}
-												)
-											}
-										</List>
+											return (
+												<List.Item key={id}>
+													<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+													<List.Content>
+														<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
+										        {
+										        	expanded
+										        	&&
+										        	<Route path={`${match.url}/:id`} component={ListOfPlaces} />
+										        }	
+										      </List.Content>
+												</List.Item>
+											)
+										}
 									)
 								}
-							} />
+							</List>									
 						</Grid.Column>
 						<Grid.Column width={10}>
-							<Route path={path} render={
-								props => { 
-									const { id } = props.match.params
-									const place = places[id]
-
-									if (place) {
-										return (
-											<pre>{JSON.stringify(place, null, 2)}</pre>
-										) 
-									} else
-										return <p>( <code>{id}</code> - место не найдено )</p>
-								}
-							} />
+							<Route path={path} component={PlaceEditor} />
 						</Grid.Column>
 					</Grid.Row>
 				</Grid>				

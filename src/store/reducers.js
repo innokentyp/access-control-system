@@ -47,18 +47,7 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      return { ...state, roots: action.roots, places: action.places, at: action.at }
-    case types.PLACE_EXPAND:
-      try {
-        const places = { ...state.places }        
-        places[action.id].expanded = action.value
-        
-        return { ...state, places: places } 
-      } catch (e) {
-        console.error(e.message)
-
-        return state
-      } 
+      return { ...state, roots: action.roots, places: action.places, at: action.at }     
     default:
       return state 
   }
