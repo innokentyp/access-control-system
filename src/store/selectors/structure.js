@@ -9,6 +9,10 @@ export function placePath(place, path = []) {
 	return place.parent ? placePath(place.parent, path) : path 
 }
 
+export function placeRoot(place) {
+	return place.parent ? placeRoot(place.parent) : place 
+}
+
 export const getStructure = createSelector(
 	state => state.structure,
 	structure => {

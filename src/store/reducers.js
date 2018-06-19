@@ -14,7 +14,10 @@ export const preloadedState = {
   structure: {
     roots: [],
     places: {},
-    at: 0
+    at: 0,
+
+    // Список корневых помещений
+    updated: []
   },
 
   personal: {
@@ -47,7 +50,24 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      return { ...state, roots: action.roots, places: action.places, at: action.at }     
+      return { ...state, roots: action.roots, places: action.places, at: action.at, updated: [] }
+    case types.UPDATE_PLACE: {
+      const places = { ...state.places } 
+      places[action.id] = { ...places[action.id], ...action.data }
+
+      const updated = [ ...state.updated ]
+      updated.includes(action.rootId) || updated.push(action.rootId)
+
+      return { ...state, places, updated } 
+    }
+    case types.PLACE_PATCHED: {
+      const updated = [ ...state.updated ]
+
+      const index = updated.indexOf(action.id)
+      index >= 0 && updated.splice(index, 1)
+
+      return { ...state, updated } 
+    }             
     default:
       return state 
   }

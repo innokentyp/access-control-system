@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { NavLink, Route } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Grid, List } from 'semantic-ui-react'
+import { Container, Grid, List, Button, Icon } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
@@ -61,10 +61,26 @@ class Structure extends Component {
 		return null
 	}	
 
+	saveClick = (e) => {
+		const { structure: { updated }, actions: { patch } } = this.props	
+
+		updated.forEach(
+			id => { 
+				patch(id).catch(e => { console.log(e.message) }) 
+			}
+		)		
+	}
+
+	refreshClick = (e) => {
+		const { actions: { requestPlaces } } = this.props
+
+		requestPlaces()
+	}
+
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { structure: { roots, places }, match, location: { pathname } } = this.props	
+		const { structure: { roots, places, updated }, match, location: { pathname } } = this.props	
 		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
 					
 		return (
@@ -101,6 +117,14 @@ class Structure extends Component {
 						</Grid.Column>
 						<Grid.Column width={10}>
 							<Route path={path} component={PlaceEditor} />
+						</Grid.Column>
+					</Grid.Row>
+
+					<Grid.Row>
+						<Grid.Column>
+							<Button positive disabled={updated.length === 0} onClick={this.saveClick}><Icon name="check" /> Записать</Button>
+							<Button disabled={updated.length === 0} onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Button>
+							<pre>{JSON.stringify(updated, null, 2)}</pre>
 						</Grid.Column>
 					</Grid.Row>
 				</Grid>				

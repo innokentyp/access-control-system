@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Segment, Form, Button, Icon, Message, List } from 'semantic-ui-react'
+import { Segment, Form, Button, List } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
@@ -10,107 +10,88 @@ import * as selectors from '../store/selectors/structure'
 class PlaceEditor extends Component {
 	constructor(props) {
 		super(props)
+		
+		const { 
+			match: { params: { id } }, 
+			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
+		} = props
 
-		const { place: { name, maximum_control } } = props
-
-		this.state = {
-			name,
-			maximum_control,
-
-			updated: false,
-
-			loading: false,
-			error: null
-		}
+		this.state = { place: { ...place }, updated: false }
 	}
 
-	UNSAFE_componentWillReceiveProps(nextProps) {
-		const { place: { name, maximum_control } } = nextProps
+	save() {
+		const { place, updated } = this.state
 
-		this.setState( 
-			{
-				name,
-				maximum_control,
+		if (updated)	
+			this.props.actions.updatePlace(place.id, place, selectors.placeRoot(place).id)		
+	}
 
-				updated: false,
+	componentWillUnmount() {
+		this.save()
+	}
 
-				loading: false,
-				error: null
-			}
-		)
+	UNSAFE_componentWillReceiveProps(nextProps) {		
+		const { 
+			match: { params: { id } }, 
+			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
+		} = nextProps
+
+		this.setState({ place: { ...place }, updated: false	})
 	}
 
 	placeNameChange = (e) => {
-		this.setState({ name: e.target.value, updated: true })
+		this.setState({ place: { ...this.state.place, name: e.target.value }, updated: true })
 	}
 
 	placeMaximumControlChange = (e) => {
-		this.setState({ maximum_control: e.target.value, updated: true })
+		this.setState({ place: { ...this.state.place, maximum_control: e.target.value }, updated: true })
 	}
 
 	formPlaceSubmit = (e) => {
 		e.preventDefault()
-
-		this.setState({ loading: true, error: null })
-
-		const { match: { params: { id } } } = this.props
-		const { name, maximum_control } = this.state
 		
-    const data = { 
-			name,
-			maximum_control
-		}	
-
-		this.props.actions.patch(id, data)
-			.catch(
-			  error => {
-			  	this.setState({ loading: false, error })				    
-			  }
-		  )    
+		this.save()
 	}
 
 	formPlaceReset = (e) => {
 		e.preventDefault()
 
-		const { place: { name, maximum_control } } = this.props
+		const { 
+			match: { params: { id } }, 
+			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
+		} = this.props		
 
-		this.setState( 
-			{
-				name,
-				maximum_control,
-
-				updated: false,
-				error: null
-			}
-		)
+		this.setState({ place: { ...place }, updated: false	})
 	}
 
 	render() {
-		const { match: { url, params: { id } }, structure: { places }, place } = this.props
-		const { name, maximum_control, updated, loading, error } = this.state
+		console.log(`render: ${this.constructor.name}`)
+
+		const { match: { url }, structure: { places } } = this.props		
+		const { place, updated } = this.state
 		
 		// <pre>{JSON.stringify(place, null, 2)}</pre>
 
 		return (
 			<Fragment>
 				<Segment vertical>
-					<Form name="form-place" id="form-place-id" loading={loading} error={!!error} onSubmit={this.formPlaceSubmit} onReset={this.formPlaceReset} autoComplete="off">
+					<Form name="form-place" id="form-place-id" onSubmit={this.formPlaceSubmit} onReset={this.formPlaceReset} autoComplete="off">
 						<Form.Group inline>
 							<Form.Field as="label" width={6}>ID</Form.Field>
-							<Form.Field as="span" width={10}>{id}</Form.Field>
+							<Form.Field as="span" width={10}>{place.id}</Form.Field>
 						</Form.Group>
 
 						<Form.Group inline>
 			      	<Form.Field as="label" width={6} htmlFor="form-place-name">Название</Form.Field>
 			      	<Form.Field width={10}>
-			      		<input type="text" name="place-name" id="form-place-name" value={name} onChange={this.placeNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      		<input type="text" name="place-name" id="form-place-name" value={place.name} onChange={this.placeNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
 			      	</Form.Field>
 			      </Form.Group>	
 						
 						<Form.Group inline>
 			      	<Form.Field as="label" width={6} htmlFor="form-place-maximum-control">Время повторного входа</Form.Field>
 			      	<Form.Field width={10}>
-			      		<input type="text" name="place-maximum-control" id="form-place-maximum-control" value={maximum_control} onChange={this.placeMaximumControlChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      		<input type="text" name="place-maximum-control" id="form-place-maximum-control" value={place.maximum_control} onChange={this.placeMaximumControlChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
 			      	</Form.Field>
 			      </Form.Group>
 
@@ -133,17 +114,17 @@ class PlaceEditor extends Component {
 							</Form.Group>
 						}
 
-						<Message
-				      error
-				      header="Ошибка при записи изменений"
-				      content={(error && error.message) ? error.message : 'Нет сообщения'}
-				    />
+						<Form.Group inline>
+							<Form.Field width={6}></Form.Field>
+							<Form.Field width={10}>
+								<Button.Group>
+							    <Button type="submit" positive disabled={!updated}>Записать</Button>
+							    <Button.Or text="&" />
+							    <Button type="reset" disabled={!updated}>Отмена</Button>
+							  </Button.Group>
+							</Form.Field>
+						</Form.Group>
 					</Form>
-				</Segment>
-
-				<Segment vertical>
-					<Button form="form-place-id" type="submit" positive disabled={!updated}><Icon name="checkmark" /> Записать</Button>
-					<Button form="form-place-id" type="reset"><Icon name="refresh" /> Обновить</Button>
 				</Segment>
 			</Fragment>					
 		)
@@ -153,8 +134,7 @@ class PlaceEditor extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state),
-			place: selectors.getPlace(state, props.match.params.id)
+			structure: selectors.getStructure(state)
 		}
 	), 
 	dispatch => (

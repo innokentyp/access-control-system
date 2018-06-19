@@ -1,4 +1,4 @@
-import { denormalize, schema, omit } from 'normalizr'
+import { denormalize, schema } from 'normalizr'
 
 import * as types from '../constants'
 
@@ -17,34 +17,37 @@ export function placesFetched(roots, places, at) {
 	}
 }
 
-export function patch(id, data) {
+export function updatePlace(id, data, rootId) {
+	return {
+		type: types.UPDATE_PLACE,
+		id,
+		data,
+		rootId
+	}
+}
+
+export function placePatched(id) {
+	return {
+		type: types.PLACE_PATCHED,
+		id
+	}
+}
+
+export function patch(id) {
 	return (dispatch, getState) => {
-		const { structure: { roots, places: prevPlaces, at } } = getState()
+		const { structure: { places: { [id]: place } } } = getState()
 
 		return new Promise(
 			(resolve, reject) => {
-				try { 
-					const places = { ...prevPlaces }
+				try {
+					const place_schema = new schema.Entity('places')
+			    place_schema.define({ places: [ place_schema ] })
 
-					places[id] = { ...places[id], ...data }
+			    const denormalizedData = denormalize({ places: [ id ] }, { places: [ place_schema ] }, { places: { [id]: place } })
 
-					{
-						const place = new schema.Entity('places', {}, 
-				      {
-				        processStrategy: (value, parent, key) => {
-				        
-				          return omit(value, 'parent')
-				        }
-				      }
-				    )
-				    place.define({ places: [ place ] })
+			    console.dir(denormalizedData)			  	
 
-				    const denormalizedData = denormalize({ places: roots }, { places: [ place ] }, { places: places })
-
-				    console.dir(denormalizedData)
-			  	}
-
-					resolve({ roots: [ ...roots ], places, at })
+					resolve(id)
 				} catch (e) {
 
 					reject(e)
@@ -52,8 +55,8 @@ export function patch(id, data) {
 		  }				
 		)
 		.then(
-			response => {				
-				dispatch(placesFetched(response.roots, response.places, response.at))
+			id => {				
+				dispatch(placePatched(id))
 			}
 		)	
 	}
