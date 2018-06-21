@@ -98,7 +98,7 @@ class Login extends Component {
 				<Form name="form-login" onSubmit={this.formLoginSubmit} onReset={this.formLoginReset} autoComplete="off" loading={loading} error={!!Object.keys(error).length} warning={!!Object.keys(warning).length}>		
 		      <Form.Field error={!!warning['user']}>
 		      	<label htmlFor="form-login-user">Имя пользователя:</label>
-			      <input ref={this.inputUser} type="text" name="user" id="form-login-user" autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" autoFocus />
+			      <input ref={this.inputUser} type="text" name="user" id="form-login-user" autoFocus />
 		      </Form.Field>
 
 			    <Form.Field error={!!warning['password']}>

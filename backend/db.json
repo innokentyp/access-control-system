@@ -3,7 +3,7 @@
     {
       "id": "1w18g4bzr5qhv36l",
       "name": "Внешняя территория",
-      "maximum_control": 0
+      "maximum_control": "300"
     },
     {
       "id": "1w18g4bzsoe2f6ue",
@@ -17,13 +17,13 @@
           "places": [
             {
               "id": "1w18g4bzx7udweqq",
-              "name": "Комната 1",
-              "maximum_control": 600
+              "name": "Комната 101",
+              "maximum_control": "100"
             },
             {
               "id": "1w18g4bzxiqgvotc",
-              "name": "Комната 2",
-              "maximum_control": 600
+              "name": "Комната 201",
+              "maximum_control": "1000"
             }
           ]
         },
@@ -34,8 +34,8 @@
           "places": [
             {
               "id": "1w18g4bzzsx1kux8",
-              "name": "Комната 3",
-              "maximum_control": 300
+              "name": "Комната 203",
+              "maximum_control": "600"
             },
             {
               "id": "1w18g4c0033dz5sl",
@@ -47,12 +47,12 @@
         {
           "id": "1w2zr25e95qazxkk",
           "name": "Этаж 3",
-          "maximum_control": 0,
+          "maximum_control": "1000",
           "places": [
             {
               "id": "1w2zr26tti9mhm83",
               "name": "Комната 5",
-              "maximum_control": 0
+              "maximum_control": "100"
             }
           ]
         }

@@ -84,14 +84,14 @@ class PlaceEditor extends Component {
 						<Form.Group inline>
 			      	<Form.Field as="label" width={6} htmlFor="form-place-name">Название</Form.Field>
 			      	<Form.Field width={10}>
-			      		<input type="text" name="place-name" id="form-place-name" value={place.name} onChange={this.placeNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      		<input type="text" name="place-name" id="form-place-name" value={place.name} onChange={this.placeNameChange} />
 			      	</Form.Field>
 			      </Form.Group>	
 						
 						<Form.Group inline>
 			      	<Form.Field as="label" width={6} htmlFor="form-place-maximum-control">Время повторного входа</Form.Field>
 			      	<Form.Field width={10}>
-			      		<input type="text" name="place-maximum-control" id="form-place-maximum-control" value={place.maximum_control} onChange={this.placeMaximumControlChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      		<input type="text" name="place-maximum-control" id="form-place-maximum-control" value={place.maximum_control} onChange={this.placeMaximumControlChange} />
 			      	</Form.Field>
 			      </Form.Group>
 
@@ -118,7 +118,7 @@ class PlaceEditor extends Component {
 							<Form.Field width={6}></Form.Field>
 							<Form.Field width={10}>
 								<Button.Group>
-							    <Button type="submit" positive disabled={!updated}>Записать</Button>
+							    <Button type="submit" positive disabled={!updated}>Ok</Button>
 							    <Button.Or text="&" />
 							    <Button type="reset" disabled={!updated}>Отмена</Button>
 							  </Button.Group>

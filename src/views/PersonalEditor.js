@@ -152,7 +152,7 @@ class PersonalEditor extends Component {
 						<Form.Group inline>
 			      	<Form.Field as="label" width={4} htmlFor="form-subject-name">Название</Form.Field>
 			      	<Form.Field width={12}>
-			      		<input type="text" name="subject-name" id="form-subject-name" value={this.state.name} onChange={this.subjectNameChange} autoComplete="nope" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+			      		<input type="text" name="subject-name" id="form-subject-name" value={this.state.name} onChange={this.subjectNameChange} />
 			      	</Form.Field>
 			      </Form.Group>	
 						
