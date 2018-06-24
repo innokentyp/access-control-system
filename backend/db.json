@@ -22,7 +22,7 @@
             },
             {
               "id": "1w18g4bzxiqgvotc",
-              "name": "Комната 201",
+              "name": "Комната 2",
               "maximum_control": "1000"
             }
           ]
@@ -34,12 +34,12 @@
           "places": [
             {
               "id": "1w18g4bzzsx1kux8",
-              "name": "Комната 203",
+              "name": "Комната 201",
               "maximum_control": "600"
             },
             {
               "id": "1w18g4c0033dz5sl",
-              "name": "Комната 4",
+              "name": "Комната 202",
               "maximum_control": 600
             }
           ]

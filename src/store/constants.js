@@ -1,15 +1,19 @@
-export const REQUEST_DATA = 'REQUEST_DATA'
+export const REQUEST_DATA = Symbol('Request data')
 
-export const LOGGED_IN = 'LOGGED_IN'
-export const LOGGED_OUT = 'LOGGED_OUT'
+export const LOGGED_IN = Symbol('Logged in')
+export const LOGGED_OUT = Symbol('Logged out')
 
-export const REQUEST_PLACES = 'REQUEST_PLACES'
-export const PLACES_FETCHED = 'PLACES_FETCHED'
-export const UPDATE_PLACE = 'UPDATE_PLACE'
-export const PLACE_PATCHED = 'PLACE_PATCHED'
+export const REQUEST_PLACES = Symbol('Request places')
+export const PLACES_FETCHED = Symbol('Places fetched')
 
-export const REQUEST_SUBJECTS = 'REQUEST_SUBJECTS'
-export const SUBJECTS_FETCHED = 'SUBJECTS_FETCHED'
+export const ADD_PLACE = Symbol('Add place')
+export const UPDATE_PLACE = Symbol('Update place')
 
-export const REQUEST_SUBJECT = 'REQUEST_SUBJECT'
-export const SUBJECT_FETCHED = 'SUBJECT_FETCHED'
+export const PLACE_PUTTED = Symbol('Place putted')
+export const PLACE_PATCHED = Symbol('Place patched')
+
+export const REQUEST_SUBJECTS = Symbol('Request subjects')
+export const SUBJECTS_FETCHED = Symbol('Subjects fetched')
+
+export const REQUEST_SUBJECT = Symbol('Request subject')
+export const SUBJECT_FETCHED = Symbol('Subject fetched')

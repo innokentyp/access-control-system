@@ -12,11 +12,11 @@ export const preloadedState = {
   },
 
   structure: {
-    roots: [],
+    roots: [], // Список корневых помещений
     places: {},
     at: 0,
-
-    // Список корневых помещений
+    
+    inserted: [],
     updated: []
   },
 
@@ -50,15 +50,35 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      return { ...state, roots: action.roots, places: action.places, at: action.at, updated: [] }
+      return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [] }
+    case types.ADD_PLACE: {
+      const places = { ...state.places } 
+      places[action.place.id] = action.place
+
+      if (action.place.parent) {
+        // Здесь вставка дочернего элемента
+
+        return state
+      } else {
+        return { ...state, roots: [ ...state.roots, action.place.id ], places, inserted: [ ...state.inserted, action.place.id ] }
+      }      
+    }  
     case types.UPDATE_PLACE: {
       const places = { ...state.places } 
       places[action.id] = { ...places[action.id], ...action.data }
 
-      const updated = [ ...state.updated ]
-      updated.includes(action.rootId) || updated.push(action.rootId)
+      if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
+        return { ...state, places }
+      else        
+        return { ...state, places, updated: [ ...state.updated, action.rootId ] }
+    }
+    case types.PLACE_PUTTED: {
+      const inserted = [ ...state.inserted ]
 
-      return { ...state, places, updated } 
+      const index = inserted.indexOf(action.id)
+      index >= 0 && inserted.splice(index, 1)
+
+      return { ...state, inserted } 
     }
     case types.PLACE_PATCHED: {
       const updated = [ ...state.updated ]

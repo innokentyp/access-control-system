@@ -30,7 +30,9 @@ class PlaceEditor extends Component {
 		this.save()
 	}
 
-	UNSAFE_componentWillReceiveProps(nextProps) {		
+	UNSAFE_componentWillReceiveProps(nextProps) {
+		this.save()
+
 		const { 
 			match: { params: { id } }, 
 			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 

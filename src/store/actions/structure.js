@@ -18,6 +18,13 @@ export function placesFetched(roots, places, at) {
 	}
 }
 
+export function addPlace(place) {
+	return {
+		type: types.ADD_PLACE,
+		place
+	}
+}
+
 export function updatePlace(id, data, rootId) {
 	return {
 		type: types.UPDATE_PLACE,
@@ -27,10 +34,60 @@ export function updatePlace(id, data, rootId) {
 	}
 }
 
+export function placePutted(id) {
+	return {
+		type: types.PLACE_PUTTED,
+		id
+	}
+}
+
 export function placePatched(id) {
 	return {
 		type: types.PLACE_PATCHED,
 		id
+	}
+}
+
+export function post() {
+	return (dispatch, getState) => {
+		const { structure: { inserted } } = getState()
+		const places = {} 
+
+		Object.values(getState().structure.places).forEach(
+			place => {
+				places[place.id] = { ...place }
+
+				delete places[place.id].parent
+			}
+		)			
+
+		const place_schema = new schema.Entity('places')
+		place_schema.define({ places: [ place_schema ] })
+
+		const data = denormalize({ places: inserted }, { places: [ place_schema ] }, { places })
+
+		return Promise.all(
+			data.places.map(
+				place => {
+					return axios
+						.post(
+							`http://localhost:8000/places`,
+							place,
+							{
+				      	headers: {
+				      		'Content-Type': 'application/json',
+				          'Authorization': `Bearer ${getState().authentication.user.jwt}`
+				      	}    		
+							}
+						)						
+						.catch(e => e)
+				}
+			)
+		).then(
+			values => {
+				values.forEach(value => { value instanceof Error ? console.log(value.message) : dispatch(placePutted(value.data.id)) })
+			}
+		)	
 	}
 }
 
@@ -69,21 +126,6 @@ export function patch() {
 							}
 						)						
 						.catch(e => e)	
-
-					/*
-					return new Promise(
-						(resolve, reject) => {
-							try {							  	
-								// axios
-
-								resolve(place.id)
-							} catch (e) {
-
-								reject(e)
-							}
-					  }				
-					).catch(e => { return e })
-					*/
 				}
 			)
 		).then(
