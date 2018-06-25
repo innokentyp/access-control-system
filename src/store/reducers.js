@@ -17,7 +17,8 @@ export const preloadedState = {
     at: 0,
     
     inserted: [],
-    updated: []
+    updated: [],
+    deleted: []
   },
 
   personal: {
@@ -50,27 +51,74 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [] }
+      return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [], deleted: [] }
     case types.ADD_PLACE: {
       const places = { ...state.places } 
       places[action.place.id] = action.place
 
       if (action.place.parent) {
-        // Здесь вставка дочернего элемента
+        const parent = places[action.place.id].parent
+        parent.places ? parent.places.push(action.place.id) : (parent.places = [action.place.id])        
 
-        return state
+        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
+          return { ...state, places }
+        else        
+          return { ...state, places, updated: [ ...state.updated, action.rootId ] }
       } else {
-        return { ...state, roots: [ ...state.roots, action.place.id ], places, inserted: [ ...state.inserted, action.place.id ] }
+        return { ...state, roots: [ ...state.roots, action.rootId ], places, inserted: [ ...state.inserted, action.rootId ] }
       }      
     }  
     case types.UPDATE_PLACE: {
       const places = { ...state.places } 
-      places[action.id] = { ...places[action.id], ...action.data }
+      places[action.id] = { ...places[action.id], ...action.data }      
 
       if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
         return { ...state, places }
       else        
         return { ...state, places, updated: [ ...state.updated, action.rootId ] }
+    }
+    case types.DELETE_PLACE: {
+      const places = { ...state.places }
+      
+      if (action.place.parent) {
+        const parent = places[action.place.parent.id]
+        
+        if (parent.places) {
+          const index = parent.places.indexOf(action.place.id)
+          index >= 0 && parent.places.splice(index, 1)
+        } 
+      }
+
+      // Удалить всех детей (рекурсивно)
+
+      delete places[action.place.id]      
+
+      if (action.place.id === action.rootId) {
+        const roots = [ ...state.roots ]
+
+        let index = roots.indexOf(action.rootId)
+        index >= 0 && roots.splice(index, 1)
+
+        const updated = [ ...state.updated ]
+
+        index = updated.indexOf(action.rootId)
+        index >= 0 && updated.splice(index, 1)
+
+        if (state.inserted.includes(action.rootId)) {
+          const inserted = [ ...state.inserted ]
+
+          index = inserted.indexOf(action.rootId)
+          index >= 0 && inserted.splice(index, 1)
+
+          return { ...state, roots, places, updated, inserted }
+        } else
+          return { ...state, roots, places, updated, deleted: [ ...state.deleted, action.rootId ] }
+      } else {
+        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
+          return { ...state, places }
+        else        
+          return { ...state, places, updated: [ ...state.updated, action.rootId ] }        
+      }
     }
     case types.PLACE_PUTTED: {
       const inserted = [ ...state.inserted ]

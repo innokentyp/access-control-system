@@ -18,10 +18,11 @@ export function placesFetched(roots, places, at) {
 	}
 }
 
-export function addPlace(place) {
+export function addPlace(place, rootId) {
 	return {
 		type: types.ADD_PLACE,
-		place
+		place,
+		rootId
 	}
 }
 
@@ -30,6 +31,14 @@ export function updatePlace(id, data, rootId) {
 		type: types.UPDATE_PLACE,
 		id,
 		data,
+		rootId
+	}
+}
+
+export function deletePlace(place, rootId) {
+	return {
+		type: types.DELETE_PLACE,
+		place,
 		rootId
 	}
 }

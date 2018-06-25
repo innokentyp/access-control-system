@@ -46,7 +46,7 @@ class PlaceEditor extends Component {
 	}
 
 	placeMaximumControlChange = (e) => {
-		this.setState({ place: { ...this.state.place, maximum_control: e.target.value }, updated: true })
+		this.setState({ place: { ...this.state.place, maximum_control: parseInt(e.target.value, 10) }, updated: true })
 	}
 
 	formPlaceSubmit = (e) => {

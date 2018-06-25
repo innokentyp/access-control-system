@@ -51,8 +51,13 @@
           "places": [
             {
               "id": "1w2zr26tti9mhm83",
-              "name": "Комната 5",
-              "maximum_control": "100"
+              "name": "Комната 301",
+              "maximum_control": 200
+            },
+            {
+              "id": "enbkqrtn2jfq4ajs",
+              "name": "Комната 302",
+              "maximum_control": 0
             }
           ]
         }

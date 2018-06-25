@@ -75,12 +75,35 @@ class Structure extends Component {
 		requestPlaces()
 	}
 
-	addClick = (id) => (e) => {
-		console.log(id)
+	addClick = (parentId) => (e) => {
+		const id = create_uuid()
+		const name = prompt('Введите название элемента', `Элемент ${id}`)
+
+		if (name) {
+			const { structure: { places: { [parentId]: parent } } } = this.props
+
+			if (parent) {
+				const place = {
+					id,
+					name: name.trim(),
+					maximum_control: 0,
+					parent
+				} 
+				
+				this.props.actions.addPlace(place, selectors.placeRoot(place).id)
+			} else
+				alert('Невозможно определить владельца элемента!')
+		}
 	}
 
 	deleteClick = (id) => (e) => {
-		console.log(id)
+		const { structure: { places: { [id]: place } } } = this.props
+
+		if (place) {
+			if (window.confirm(`Выбросить ${place.name}?`))						
+				this.props.actions.deletePlace(place, selectors.placeRoot(place).id)
+		} else
+			alert('Невозможно найти элемент!')
 	}
 
 	addRootClick = (e) => {
@@ -96,14 +119,14 @@ class Structure extends Component {
 				maximum_control: 0
 			} 
 			
-			this.props.actions.addPlace(place)
+			this.props.actions.addPlace(place, id)
 		}
 	}
 
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { structure: { roots, places, inserted, updated }, match, location: { pathname } } = this.props	
+		const { structure: { roots, places, inserted, updated, deleted }, match, location: { pathname } } = this.props	
 		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
 					
 		return (
@@ -162,7 +185,7 @@ class Structure extends Component {
 							</List>			
 						</Grid.Column>
 
-						<Grid.Column width={10}>
+						<Grid.Column width={10} style={{ minHeight: '215px' }}>
 							<Route path={path} component={PlaceEditor} />
 						</Grid.Column>
 					</Grid.Row>
@@ -174,11 +197,19 @@ class Structure extends Component {
 						</Grid.Column>
 					</Grid.Row>
 
-					<Grid.Row>
-						<Grid.Column width={3}>Inserted:</Grid.Column>
-						<Grid.Column width={5}><pre>{JSON.stringify(inserted, null, 2)}</pre></Grid.Column>
-						<Grid.Column width={3}>Updated:</Grid.Column>
-						<Grid.Column width={5}><pre>{JSON.stringify(updated, null, 2)}</pre></Grid.Column>
+					<Grid.Row>						
+						<Grid.Column width={5}>
+							Inserted:
+							<pre>{JSON.stringify(inserted, null, 2)}</pre>
+						</Grid.Column>
+						<Grid.Column width={5}>
+							Updated:
+							<pre>{JSON.stringify(updated, null, 2)}</pre>
+						</Grid.Column>						
+						<Grid.Column width={6}>
+							Deleted:
+							<pre>{JSON.stringify(deleted, null, 2)}</pre>
+						</Grid.Column>
 					</Grid.Row>					
 				</Grid>				
 			</Container>
