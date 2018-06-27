@@ -57,7 +57,7 @@ function structure(state = preloadedState.structure, action) {
       places[action.place.id] = action.place
 
       if (action.place.parent) {
-        const parent = places[action.place.id].parent
+        const parent = action.place.parent
         parent.places ? parent.places.push(action.place.id) : (parent.places = [action.place.id])        
 
         if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
@@ -80,20 +80,35 @@ function structure(state = preloadedState.structure, action) {
     case types.DELETE_PLACE: {
       const places = { ...state.places }
       
+      function deletePlace(id) {
+        const place = places[id]
+
+        if (place) {
+          if (place.places) {
+            place.places.forEach(item => { deletePlace(item) })
+
+            place.places = []
+          }
+
+          delete places[id]
+        }
+      }
+
+      deletePlace(action.place.id)
+      
       if (action.place.parent) {
-        const parent = places[action.place.parent.id]
+        const parent = action.place.parent
         
         if (parent.places) {
           const index = parent.places.indexOf(action.place.id)
           index >= 0 && parent.places.splice(index, 1)
         } 
-      }
 
-      // Удалить всех детей (рекурсивно)
-
-      delete places[action.place.id]      
-
-      if (action.place.id === action.rootId) {
+        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
+          return { ...state, places }
+        else        
+          return { ...state, places, updated: [ ...state.updated, action.rootId ] }
+      } else {
         const roots = [ ...state.roots ]
 
         let index = roots.indexOf(action.rootId)
@@ -113,11 +128,6 @@ function structure(state = preloadedState.structure, action) {
           return { ...state, roots, places, updated, inserted }
         } else
           return { ...state, roots, places, updated, deleted: [ ...state.deleted, action.rootId ] }
-      } else {
-        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
-          return { ...state, places }
-        else        
-          return { ...state, places, updated: [ ...state.updated, action.rootId ] }        
       }
     }
     case types.PLACE_PUTTED: {
@@ -135,7 +145,15 @@ function structure(state = preloadedState.structure, action) {
       index >= 0 && updated.splice(index, 1)
 
       return { ...state, updated } 
-    }             
+    }      
+    case types.PLACE_DELETED: {
+      const deleted = [ ...state.deleted ]
+
+      const index = deleted.indexOf(action.id)
+      index >= 0 && deleted.splice(index, 1)
+
+      return { ...state, deleted } 
+    }       
     default:
       return state 
   }

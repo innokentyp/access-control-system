@@ -57,6 +57,13 @@ export function placePatched(id) {
 	}
 }
 
+export function placeDeleted(id) {
+	return {
+		type: types.PLACE_DELETED,
+		id
+	}
+}
+
 export function post() {
 	return (dispatch, getState) => {
 		const { structure: { inserted } } = getState()
@@ -140,6 +147,35 @@ export function patch() {
 		).then(
 			values => {
 				values.forEach(value => { value instanceof Error ? console.log(value.message) : dispatch(placePatched(value.data.id)) })
+			}
+		)	
+	}
+}
+
+export function remove() {
+	return (dispatch, getState) => {
+		const { structure: { deleted } } = getState()
+
+		return Promise.all(
+			deleted.map(
+				id => {
+					return axios
+						.delete(
+							`http://localhost:8000/places/${id}`,							
+							{
+				      	headers: {
+				      		'Content-Type': 'application/json',
+				          'Authorization': `Bearer ${getState().authentication.user.jwt}`
+				      	}    		
+							}
+						)
+						.then(response => id)
+						.catch(e => e)
+				}
+			)
+		).then(
+			values => {				
+				values.forEach(value => { value instanceof Error ? console.log(value.message) : dispatch(placeDeleted(value)) })
 			}
 		)	
 	}

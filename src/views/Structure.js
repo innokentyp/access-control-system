@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { NavLink, Route } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Grid, List, Button, Icon, Menu, Dropdown } from 'semantic-ui-react'
+import { Container, Grid, List, Button, Icon, Menu, Dropdown, Popup } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
@@ -11,9 +11,22 @@ import PlaceEditor from '../components/PlaceEditor'
 import create_uuid from '../library/uuid'
 
 class _ListOfPlaces extends Component {
+
+	addClick = (parentId) => (e) => {
+		e.preventDefault()
+
+		Structure.add.call(this, parentId)		
+	}
+
+	deleteClick = (id) => (e) => {
+		e.preventDefault()
+
+		Structure.remove.call(this, id)		
+	}
+
 	render() {
 		const { location: { pathname }, match: { url, params: { id: parentId } }, structure: { places } } = this.props
-		
+				
 		return (
 			<List.List>
 				{
@@ -26,7 +39,17 @@ class _ListOfPlaces extends Component {
 								<List.Item key={id}>
 									<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
-										<NavLink to={`${url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
+										<Popup
+											trigger={<NavLink to={`${url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>}
+											content={
+												<List>	    
+											    <List.Item as="a" href={`${url}/${id}`} onClick={this.addClick(id)}>Новый элемент</List.Item>
+											    <List.Item as="a" href={`${url}/${id}`} onClick={this.deleteClick(id)}>Выбросить</List.Item>
+											  </List>
+											}
+											position="right center"
+											hoverable
+										/>										
 						        {
 						        	expanded
 						        	&&
@@ -48,6 +71,11 @@ const ListOfPlaces = connect(
 		{ 
 			structure: selectors.getStructure(state)			
 		}
+	),
+	dispatch => (
+		{
+			actions: bindActionCreators(actions, dispatch)
+		}
 	)
 ) (_ListOfPlaces)
 
@@ -63,10 +91,11 @@ class Structure extends Component {
 	}	
 
 	saveClick = (e) => {
-		const { structure: { inserted, updated }, actions: { post, patch } } = this.props
+		const { structure: { inserted, updated, deleted }, actions: { post, patch, remove } } = this.props
 
 		inserted.length && post()
 		updated.length && patch() 
+		deleted.length && remove()
 	}
 
 	refreshClick = (e) => {
@@ -75,12 +104,12 @@ class Structure extends Component {
 		requestPlaces()
 	}
 
-	addClick = (parentId) => (e) => {
+	static add(parentId) {
 		const id = create_uuid()
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
-			const { structure: { places: { [parentId]: parent } } } = this.props
+			const { structure: { places: { [parentId]: parent } }, actions: { addPlace } } = this.props
 
 			if (parent) {
 				const place = {
@@ -90,20 +119,39 @@ class Structure extends Component {
 					parent
 				} 
 				
-				this.props.actions.addPlace(place, selectors.placeRoot(place).id)
+				addPlace(place, selectors.placeRoot(place).id)
 			} else
 				alert('Невозможно определить владельца элемента!')
 		}
 	}
 
-	deleteClick = (id) => (e) => {
-		const { structure: { places: { [id]: place } } } = this.props
+	addClick = (parentId) => (e) => {
+		e.preventDefault() 
+
+		Structure.add.call(this, parentId)
+	}
+
+	static remove(id) {
+		const { structure: { places: { [id]: place } }, location: { pathname }, history, actions: { deletePlace } } = this.props
 
 		if (place) {
-			if (window.confirm(`Выбросить ${place.name}?`))						
-				this.props.actions.deletePlace(place, selectors.placeRoot(place).id)
+			if (window.confirm(`Выбросить ${place.name}?`))	{
+				deletePlace(place, selectors.placeRoot(place).id)
+
+				const index = pathname.indexOf(`/${id}`)
+
+				if (index >= 0) {
+					history.push(pathname.slice(0, index))
+				}				
+			}
 		} else
 			alert('Невозможно найти элемент!')
+	}
+
+	deleteClick = (id) => (e) => {
+		e.preventDefault()
+
+		Structure.remove.call(this, id)
 	}
 
 	addRootClick = (e) => {
@@ -166,7 +214,17 @@ class Structure extends Component {
 												<List.Item key={id}>
 													<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
-														<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>
+														<Popup
+															trigger={<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>}
+															content={
+																<List>	    
+															    <List.Item as="a" href={`${match.url}/${id}`} onClick={this.addClick(id)}>Новый элемент</List.Item>
+															    <List.Item as="a" href={`${match.url}/${id}`} onClick={this.deleteClick(id)}>Выбросить</List.Item>
+															  </List>
+															}
+															position="right center"
+															hoverable
+														/>														
 										        {
 										        	expanded
 										        	&&
@@ -180,7 +238,7 @@ class Structure extends Component {
 								}
 								<List.Item>
 									<List.Icon name="down triangle" style={{ visibility: 'hidden' }} />
-									<List.Content as="a" href="/structure/add" onClick={this.addRootClick}>( Новый элемент )</List.Content>
+									<List.Content as="a" href={match.url} onClick={this.addRootClick}>( Новый элемент )</List.Content>
 								</List.Item>
 							</List>			
 						</Grid.Column>
@@ -192,7 +250,7 @@ class Structure extends Component {
 
 					<Grid.Row>
 						<Grid.Column>
-							<Button positive disabled={inserted.length === 0 && updated.length === 0} onClick={this.saveClick}><Icon name="check" /> Записать</Button>
+							<Button positive disabled={inserted.length === 0 && updated.length === 0 && deleted.length === 0} onClick={this.saveClick}><Icon name="check" /> Записать</Button>
 							<Button onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Button>
 						</Grid.Column>
 					</Grid.Row>
