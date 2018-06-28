@@ -10,20 +10,82 @@ import * as selectors from '../store/selectors/structure'
 import PlaceEditor from '../components/PlaceEditor'
 import create_uuid from '../library/uuid'
 
+class PlaceItem extends Component {
+	state = { isOpen: false }
+
+	timeout = null	
+
+	removeTimeout() {
+		if (this.timeout) {
+			clearTimeout(this.timeout)
+
+			this.timeout = null
+		}
+	}
+
+	popupOpen = (e) => {
+		this.removeTimeout()		
+
+		this.setState({ isOpen: true })
+	}
+
+	popupClose = (e) => {		
+		this.removeTimeout()
+			
+		this.timeout = setTimeout(() => {
+			this.timeout = null
+
+			this.setState({ isOpen: false }) 
+		}, 200)
+	}
+
+	popupMouseEnter = (e) => {
+		this.removeTimeout()
+	}		
+
+	addClick = (e) => {
+		e.preventDefault()
+
+		this.props.add()
+
+		this.setState({ isOpen: false })
+	}
+
+	deleteClick = (e) => {
+		e.preventDefault()
+
+		this.props.remove()
+
+		this.setState({ isOpen: false })
+	}
+
+	render() {
+		const { to, name } = this.props
+
+		const { isOpen } = this.state
+
+		return (
+			<Popup
+				trigger={<NavLink to={to} activeStyle={{ color: 'orange' }}>{ name }</NavLink>}
+				content={
+					<List link>	    
+				    <List.Item as="a" href={to} onClick={this.addClick}>Новый элемент</List.Item>
+				    <List.Item as="a" href={to} onClick={this.deleteClick}>Выбросить</List.Item>
+				  </List>
+				}
+				position="right center"
+				horizontalOffset={4}
+				hoverable
+				open={isOpen}
+				onOpen={this.popupOpen}
+				onClose={this.popupClose}
+				onMouseEnter={this.popupMouseEnter}
+			/>
+		)
+	}
+}
+
 class _ListOfPlaces extends Component {
-
-	addClick = (parentId) => (e) => {
-		e.preventDefault()
-
-		Structure.add.call(this, parentId)		
-	}
-
-	deleteClick = (id) => (e) => {
-		e.preventDefault()
-
-		Structure.remove.call(this, id)		
-	}
-
 	render() {
 		const { location: { pathname }, match: { url, params: { id: parentId } }, structure: { places } } = this.props
 				
@@ -39,17 +101,7 @@ class _ListOfPlaces extends Component {
 								<List.Item key={id}>
 									<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
-										<Popup
-											trigger={<NavLink to={`${url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>}
-											content={
-												<List>	    
-											    <List.Item as="a" href={`${url}/${id}`} onClick={this.addClick(id)}>Новый элемент</List.Item>
-											    <List.Item as="a" href={`${url}/${id}`} onClick={this.deleteClick(id)}>Выбросить</List.Item>
-											  </List>
-											}
-											position="right center"
-											hoverable
-										/>										
+										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} />
 						        {
 						        	expanded
 						        	&&
@@ -179,10 +231,10 @@ class Structure extends Component {
 					
 		return (
 			<Container as="section">
-				<Menu secondary size="small">
+				<Menu secondary>
 					<Route path={path} children={
 						({ match }) => (
-							<Dropdown item text="Меню">
+							<Dropdown item text={match ? (places[match.params.id] ? places[match.params.id].name : match.params.id) : 'Меню'}>
 		            <Dropdown.Menu>
 		            	{
 		            		match 
@@ -214,17 +266,7 @@ class Structure extends Component {
 												<List.Item key={id}>
 													<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
-														<Popup
-															trigger={<NavLink to={`${match.url}/${id}`} activeStyle={{ color: 'orange' }}>{ place.name }</NavLink>}
-															content={
-																<List>	    
-															    <List.Item as="a" href={`${match.url}/${id}`} onClick={this.addClick(id)}>Новый элемент</List.Item>
-															    <List.Item as="a" href={`${match.url}/${id}`} onClick={this.deleteClick(id)}>Выбросить</List.Item>
-															  </List>
-															}
-															position="right center"
-															hoverable
-														/>														
+														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} /> 
 										        {
 										        	expanded
 										        	&&
@@ -238,7 +280,7 @@ class Structure extends Component {
 								}
 								<List.Item>
 									<List.Icon name="down triangle" style={{ visibility: 'hidden' }} />
-									<List.Content as="a" href={match.url} onClick={this.addRootClick}>( Новый элемент )</List.Content>
+									<List.Content as="a" href={match.url} onClick={this.addRootClick}>( Новый корневой элемент )</List.Content>
 								</List.Item>
 							</List>			
 						</Grid.Column>

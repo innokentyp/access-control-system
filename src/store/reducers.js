@@ -87,7 +87,7 @@ function structure(state = preloadedState.structure, action) {
           if (place.places) {
             place.places.forEach(item => { deletePlace(item) })
 
-            place.places = []
+            delete place.places
           }
 
           delete places[id]
@@ -101,7 +101,11 @@ function structure(state = preloadedState.structure, action) {
         
         if (parent.places) {
           const index = parent.places.indexOf(action.place.id)
-          index >= 0 && parent.places.splice(index, 1)
+          if (index >= 0) {
+            parent.places.splice(index, 1)
+
+            parent.places.length === 0 && delete parent.places
+          }
         } 
 
         if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
