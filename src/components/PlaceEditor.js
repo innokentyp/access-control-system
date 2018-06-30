@@ -124,7 +124,7 @@ class PlaceEditor extends Component {
 								<Button.Group>
 							    <Button type="submit" positive disabled={!updated}>Ok</Button>
 							    <Button.Or text="&" />
-							    <Button type="reset" disabled={!updated}>Отмена</Button>
+							    <Button type="reset" negative={updated} disabled={!updated}>Отмена</Button>
 							  </Button.Group>
 							</Form.Field>
 						</Form.Group>

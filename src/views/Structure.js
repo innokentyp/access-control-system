@@ -61,13 +61,12 @@ class PlaceItem extends Component {
 
 	render() {
 		const { to, name } = this.props
-
 		const { isOpen } = this.state
 
-		return (
+		return (			
 			<Popup
 				trigger={<NavLink to={to} activeStyle={{ color: 'orange' }}>{ name }</NavLink>}
-				content={
+				content={					
 					<List link>	    
 				    <List.Item as="a" href={to} onClick={this.addClick}>Новый элемент</List.Item>
 				    <List.Item as="a" href={to} onClick={this.deleteClick}>Выбросить</List.Item>
@@ -80,7 +79,7 @@ class PlaceItem extends Component {
 				onOpen={this.popupOpen}
 				onClose={this.popupClose}
 				onMouseEnter={this.popupMouseEnter}
-			/>
+			/>			
 		)
 	}
 }
@@ -99,7 +98,7 @@ class _ListOfPlaces extends Component {
 
 							return (
 								<List.Item key={id}>
-									<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+									<List.Icon color="blue" name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
 										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} />
 						        {
@@ -132,7 +131,7 @@ const ListOfPlaces = connect(
 ) (_ListOfPlaces)
 
 class Structure extends Component {
-	state = { data: {} }
+	state = { }
 	
 	static getDerivedStateFromProps(props, state) {
 		const { pathname } = props.location		
@@ -141,7 +140,7 @@ class Structure extends Component {
 		
 		return null
 	}	
-
+	
 	saveClick = (e) => {
 		const { structure: { inserted, updated, deleted }, actions: { post, patch, remove } } = this.props
 
@@ -151,9 +150,11 @@ class Structure extends Component {
 	}
 
 	refreshClick = (e) => {
-		const { actions: { requestPlaces } } = this.props
+		const { actions: { requestPlaces }, history } = this.props
 
 		requestPlaces()
+
+		history.push('/structure')
 	}
 
 	static add(parentId) {
@@ -161,7 +162,7 @@ class Structure extends Component {
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
-			const { structure: { places: { [parentId]: parent } }, actions: { addPlace } } = this.props
+			const { structure: { places: { [parentId]: parent } }, actions: { addPlace }, history } = this.props
 
 			if (parent) {
 				const place = {
@@ -172,6 +173,8 @@ class Structure extends Component {
 				} 
 				
 				addPlace(place, selectors.placeRoot(place).id)
+
+				history.push('/structure/' + selectors.placePath(place).map(item => item.id).join('/'))
 			} else
 				alert('Невозможно определить владельца элемента!')
 		}
@@ -183,7 +186,7 @@ class Structure extends Component {
 		Structure.add.call(this, parentId)
 	}
 
-	static remove(id) {
+	static remove(id) {		
 		const { structure: { places: { [id]: place } }, location: { pathname }, history, actions: { deletePlace } } = this.props
 
 		if (place) {
@@ -197,8 +200,8 @@ class Structure extends Component {
 				}				
 			}
 		} else
-			alert('Невозможно найти элемент!')
-	}
+			alert('Невозможно найти элемент!')			
+	}	
 
 	deleteClick = (id) => (e) => {
 		e.preventDefault()
@@ -213,6 +216,8 @@ class Structure extends Component {
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
+			const { history }	= this.props
+
 			const place = {
 				id,
 				name: name.trim(),
@@ -220,21 +225,38 @@ class Structure extends Component {
 			} 
 			
 			this.props.actions.addPlace(place, id)
+
+			history.push('/structure/' + id)
 		}
 	}
 
 	render() {
-		console.log(`render: ${this.constructor.name}`)
+		console.log(`render: ${this.constructor.name}`)		
 
 		const { structure: { roots, places, inserted, updated, deleted }, match, location: { pathname } } = this.props	
 		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
-					
+		
+		function trigger(match) {
+			return (
+				<Fragment>
+					<Icon color="orange" name="bolt" />
+					{
+						match 
+						?
+						<span style={{ color: 'orange' }}>{places[match.params.id] ? places[match.params.id].name : match.params.id}</span> 
+						:
+						'( Нет )'
+					}
+				</Fragment>
+			)
+		} 					
+
 		return (
 			<Container as="section">
 				<Menu secondary>
 					<Route path={path} children={
 						({ match }) => (
-							<Dropdown item text={match ? (places[match.params.id] ? places[match.params.id].name : match.params.id) : 'Меню'}>
+							<Dropdown item trigger={trigger(match)}>
 		            <Dropdown.Menu>
 		            	{
 		            		match 
@@ -264,7 +286,7 @@ class Structure extends Component {
 
 											return (
 												<List.Item key={id}>
-													<List.Icon name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+													<List.Icon color="blue" name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
 														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} /> 
 										        {
@@ -282,7 +304,7 @@ class Structure extends Component {
 									<List.Icon name="down triangle" style={{ visibility: 'hidden' }} />
 									<List.Content as="a" href={match.url} onClick={this.addRootClick}>( Новый корневой элемент )</List.Content>
 								</List.Item>
-							</List>			
+							</List>									
 						</Grid.Column>
 
 						<Grid.Column width={10} style={{ minHeight: '215px' }}>
@@ -293,7 +315,7 @@ class Structure extends Component {
 					<Grid.Row>
 						<Grid.Column>
 							<Button positive disabled={inserted.length === 0 && updated.length === 0 && deleted.length === 0} onClick={this.saveClick}><Icon name="check" /> Записать</Button>
-							<Button onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Button>
+							<Button negative={inserted.length > 0 || updated.length > 0 || deleted.length > 0} onClick={this.refreshClick}><Icon name="refresh" /> Обновить</Button>
 						</Grid.Column>
 					</Grid.Row>
 
@@ -311,7 +333,7 @@ class Structure extends Component {
 							<pre>{JSON.stringify(deleted, null, 2)}</pre>
 						</Grid.Column>
 					</Grid.Row>					
-				</Grid>				
+				</Grid>
 			</Container>
 		)
 	}	
