@@ -41,6 +41,11 @@
               "id": "1w18g4c0033dz5sl",
               "name": "Комната 202",
               "maximum_control": 200
+            },
+            {
+              "id": "wyo4mmrxtxvr0rio",
+              "name": "Комната 203",
+              "maximum_control": 100
             }
           ]
         },

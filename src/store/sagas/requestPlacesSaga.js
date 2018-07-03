@@ -3,39 +3,46 @@ import axios from 'axios'
 import { normalize, schema } from 'normalizr'
 
 import * as types from '../constants'
+import { placesFetched } from '../actions/structure'
 
-function* fetchPlaces(action) {
+export function getJWT(state) {
+  return state.authentication.user.jwt
+}
+
+export function getNormalizedData(data) {
+  const place = new schema.Entity('places', {}, 
+    {
+      processStrategy: (value, parent, key) => {
+        if (parent.id) value.parent = parent          
+
+        return value
+      }
+    }
+  )
+  place.define({ places: [ place ] })
+
+  return normalize(data, [ place ])
+}
+
+export function* fetchPlaces(action) {
   try {
     const response = yield call(
     	axios.get, 
     	'http://localhost:8000/places', 
     	{ 
         params: { },
-    		headers: { 'Authorization': `Bearer ${yield select((state) => state.authentication.user.jwt)}` } 
+    		headers: { 'Authorization': `Bearer ${yield select(getJWT)}` } 
     	}
     )
 
-    const place = new schema.Entity('places', {}, 
-      {
-        processStrategy: (value, parent, key) => {
-          if (parent.id) value.parent = parent          
+    const normalizedData = yield call(getNormalizedData, response.data)
 
-          return value
-        }
-      }
-    )
-    place.define({ places: [ place ] })
-
-    const normalizedData = normalize(response.data, [ place ])
-
-    yield put({ type: types.PLACES_FETCHED, roots: normalizedData.result, places: normalizedData.entities.places, at: Date.now() })
+    yield put(placesFetched(normalizedData.result, normalizedData.entities.places, Date.now()))
   } catch (e) {   
     console.log(e.message) 
   }
 }
 
-function* requestPlacesSaga() {
+export default function* requestPlacesSaga() {
   yield takeLatest(types.REQUEST_PLACES, fetchPlaces)
 }
-
-export default requestPlacesSaga
