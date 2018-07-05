@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Segment, Form, Button, List } from 'semantic-ui-react'
+import { Segment, Form, Button, List, Breadcrumb } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
@@ -71,14 +71,31 @@ class PlaceEditor extends Component {
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { match: { url }, structure: { places } } = this.props		
+		const { match: { url, params: { id } }, structure: { places, places: { [id]: init_place = { id, name: id, maximum_control: 0 } } } } = this.props		
 		const { place, updated } = this.state
 		
 		// <pre>{JSON.stringify(place, null, 2)}</pre>
 
 		return (
 			<Fragment>
-				<Segment vertical>
+				<Breadcrumb>
+					{
+						selectors.placePath(init_place).map(
+							(item, i, array) => (
+								i < array.length - 1
+								?
+								<Fragment key={item.id}>
+									<Breadcrumb.Section link as={Link} to={`/structure/${array.slice(0,i+1).map(item => item.id).join('/')}`}>{item.name}</Breadcrumb.Section>
+				    			<Breadcrumb.Divider icon="right angle" />
+			    			</Fragment>
+								:
+								<Breadcrumb.Section key={item.id} active>{item.name}</Breadcrumb.Section>
+							)
+						)
+					}
+			  </Breadcrumb>
+				
+				<Segment secondary padded="very">
 					<Form name="form-place" id="form-place-id" onSubmit={this.formPlaceSubmit} onReset={this.formPlaceReset} autoComplete="off">
 						<Form.Group inline>
 							<Form.Field as="label" width={6}>ID</Form.Field>

@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { NavLink, Route } from 'react-router-dom'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Container, Grid, List, Button, Icon, Menu, Dropdown, Popup } from 'semantic-ui-react'
+import { Container, Grid, List, Button, Icon, Menu, Dropdown, Popup, Header } from 'semantic-ui-react'
 
 import * as actions from '../store/actions/structure'
 import * as selectors from '../store/selectors/structure'
@@ -98,7 +98,7 @@ class _ListOfPlaces extends Component {
 
 							return (
 								<List.Item key={id}>
-									<List.Icon color="blue" name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+									<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
 										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} />
 						        {
@@ -134,8 +134,32 @@ class Structure extends Component {
 	state = { }
 	
 	static getDerivedStateFromProps(props, state) {
-		const { pathname } = props.location		
-		
+		const { location: { pathname }, structure: { at } } = props	
+
+		if (at > 0) {
+			const match = pathname.match(new RegExp('\\w+', 'g'))
+
+			if (match) {
+				const length = match.length
+
+				while (match.length > 1) {
+					const { structure: { places: { [match[match.length - 1]]: place } } } = props
+
+					if (place) break
+
+					match.splice(match.length - 1)	
+				}
+				
+				if (match.length < length) {
+					const { history }	= props
+
+					history.replace('/' + match.join('/'))
+
+					return null
+				} 
+			}
+		}
+
 		window.sessionStorage.setItem('places-selected-path', pathname)
 		
 		return null
@@ -150,11 +174,9 @@ class Structure extends Component {
 	}
 
 	refreshClick = (e) => {
-		const { actions: { requestPlaces }, history } = this.props
+		const { actions: { requestPlaces } } = this.props
 
 		requestPlaces()
-
-		history.push('/structure')
 	}
 
 	static add(parentId) {
@@ -239,7 +261,7 @@ class Structure extends Component {
 		function trigger(match) {
 			return (
 				<Fragment>
-					<Icon color="orange" name="bolt" />
+					<Icon color="yellow" name="warning circle" />
 					{
 						match 
 						?
@@ -253,6 +275,8 @@ class Structure extends Component {
 
 		return (
 			<Container as="section">
+				<Header as="h4">Структура</Header>
+
 				<Menu secondary>
 					<Route path={path} children={
 						({ match }) => (
@@ -274,9 +298,9 @@ class Structure extends Component {
 					} />					
 				</Menu>
 
-				<Grid>
+				<Grid stackable>
 					<Grid.Row>
-						<Grid.Column width={6}>							
+						<Grid.Column width={6}>
 							<List>
 								{
 									roots.map(
@@ -286,7 +310,7 @@ class Structure extends Component {
 
 											return (
 												<List.Item key={id}>
-													<List.Icon color="blue" name={`${expanded  ? 'down' : 'right'} triangle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+													<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
 														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} /> 
 										        {

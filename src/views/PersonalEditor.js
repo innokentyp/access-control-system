@@ -136,7 +136,7 @@ class PersonalEditor extends Component {
 			<Container as="section">
 				<Breadcrumb>
 			    <Breadcrumb.Section link as={Link} to="/personal" onClick={this.allClick}>Список персонала</Breadcrumb.Section>
-			    <Breadcrumb.Divider icon="right arrow" />
+			    <Breadcrumb.Divider icon="right angle" />
 			    <Breadcrumb.Section active>{subject.name ? subject.name : subject.id}</Breadcrumb.Section>
 			  </Breadcrumb>
 
