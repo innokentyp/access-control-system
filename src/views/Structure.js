@@ -59,13 +59,55 @@ class PlaceItem extends Component {
 		this.setState({ isOpen: false })
 	}
 
+	placeDragStart = (to) => (e) => {
+		this.removeTimeout()
+		this.setState({ isOpen: false })
+
+		e.dataTransfer.setData('text/plain', to)
+		e.dataTransfer.dropEffect = 'move'
+	} 
+
+	placeDragOver(e) {
+		e.preventDefault()
+
+		e.dataTransfer.dropEffect = 'move'
+	}
+
+	placeDrop = (to) => (e) => {
+		e.preventDefault()
+
+		const data = e.dataTransfer.getData('text/plain')
+
+		if (to.indexOf(data) === 0) {
+			// Запрет переподчинять себе и потомкам
+			console.log('samopal')
+
+			return
+		}
+
+		if (data.indexOf(to) === 0) {
+			// Запрет переподчинять отцу (но не предкам)
+			const re = new RegExp('\\w+', 'g')
+
+			if (data.match(re).length === to.match(re).length + 1) {
+				console.log('samopal')
+
+				return
+			}
+		}
+
+		console.log(data)
+
+		this.props.change(data)
+	}
+
 	render() {
 		const { to, name } = this.props
 		const { isOpen } = this.state
 
 		return (			
 			<Popup
-				trigger={<NavLink to={to} activeStyle={{ color: 'orange' }}>{ name }</NavLink>}
+				trigger={<NavLink to={to} activeStyle={{ color: 'orange' }} onDragStart={this.placeDragStart(to)} onDragOver={this.placeDragOver} onDrop={this.placeDrop(to)} draggable>{ name }</NavLink>}
 				content={					
 					<List link>	    
 				    <List.Item as="a" href={to} onClick={this.addClick}>Новый элемент</List.Item>
@@ -100,7 +142,7 @@ class _ListOfPlaces extends Component {
 								<List.Item key={id}>
 									<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
-										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} />
+										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} />
 						        {
 						        	expanded
 						        	&&
@@ -252,6 +294,14 @@ class Structure extends Component {
 		}
 	}
 
+	static change(parent, newChildPath) {
+		const match = newChildPath.match(new RegExp('\\w+', 'g'))
+		
+		const { structure: { places: { [match[match.length - 1]]: place } }, actions: { changePlaceParent } } = this.props
+
+		changePlaceParent(place, parent)
+	}
+
 	render() {
 		console.log(`render: ${this.constructor.name}`)		
 
@@ -312,7 +362,7 @@ class Structure extends Component {
 												<List.Item key={id}>
 													<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
-														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} /> 
+														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} /> 
 										        {
 										        	expanded
 										        	&&

@@ -134,6 +134,11 @@ function structure(state = preloadedState.structure, action) {
           return { ...state, roots, places, updated, deleted: [ ...state.deleted, action.rootId ] }
       }
     }
+    case types.CHANGE_PLACE_PARENT: {
+      console.log(action.place, action.parent) 
+  
+      return { ...state }
+    }
     case types.PLACE_PUTTED: {
       const inserted = [ ...state.inserted ]
 

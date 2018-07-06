@@ -9,6 +9,7 @@ export const PLACES_FETCHED = Symbol('Places fetched')
 export const ADD_PLACE = Symbol('Add place')
 export const UPDATE_PLACE = Symbol('Update place')
 export const DELETE_PLACE = Symbol('Delete place')
+export const CHANGE_PLACE_PARENT = Symbol('Change place parent')
 
 export const PLACE_PUTTED = Symbol('Place putted')
 export const PLACE_PATCHED = Symbol('Place patched')

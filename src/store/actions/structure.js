@@ -43,6 +43,14 @@ export function deletePlace(place, rootId) {
 	}
 }
 
+export function changePlaceParent(place, parent) {
+	return {
+		type: types.CHANGE_PLACE_PARENT,
+		place,
+		parent
+	}
+}
+
 export function placePutted(id) {
 	return {
 		type: types.PLACE_PUTTED,
