@@ -79,8 +79,7 @@ class PlaceItem extends Component {
 		const data = e.dataTransfer.getData('text/plain')
 
 		if (to.indexOf(data) === 0) {
-			// Запрет переподчинять себе и потомкам
-			console.log('samopal')
+			// Запрет переподчинять себе и потомкам		
 
 			return
 		}
@@ -90,13 +89,10 @@ class PlaceItem extends Component {
 			const re = new RegExp('\\w+', 'g')
 
 			if (data.match(re).length === to.match(re).length + 1) {
-				console.log('samopal')
-
+				
 				return
 			}
 		}
-
-		console.log(data)
 
 		this.props.change(data)
 	}
@@ -273,6 +269,14 @@ class Structure extends Component {
 		Structure.remove.call(this, id)
 	}
 
+	static change(parent, newChildPath) {
+		const match = newChildPath.match(new RegExp('\\w+', 'g'))
+		
+		const { structure: { places: { [match[match.length - 1]]: place } }, actions: { changePlaceParent } } = this.props
+
+		changePlaceParent(place, parent)
+	}
+
 	addRootClick = (e) => {
 		e.preventDefault()
 
@@ -294,12 +298,26 @@ class Structure extends Component {
 		}
 	}
 
-	static change(parent, newChildPath) {
-		const match = newChildPath.match(new RegExp('\\w+', 'g'))
-		
-		const { structure: { places: { [match[match.length - 1]]: place } }, actions: { changePlaceParent } } = this.props
+	addRootDragOver = (e) => {
+		e.preventDefault()
 
-		changePlaceParent(place, parent)
+		e.dataTransfer.dropEffect = 'move'
+	}
+
+	addRootDrop = (e) => {
+		e.preventDefault()
+
+		const data = e.dataTransfer.getData('text/plain')
+		
+		// Запрет переосить в корень корневой элемент
+		const re = new RegExp('\\w+', 'g')
+
+		if (data.match(re).length === 2) {
+			
+			return
+		}		
+
+		Structure.change.call(this, null, data)
 	}
 
 	render() {
@@ -376,7 +394,7 @@ class Structure extends Component {
 								}
 								<List.Item>
 									<List.Icon name="down triangle" style={{ visibility: 'hidden' }} />
-									<List.Content as="a" href={match.url} onClick={this.addRootClick}>( Новый корневой элемент )</List.Content>
+									<List.Content as="a" href={match.url} onClick={this.addRootClick} onDragOver={this.addRootDragOver} onDrop={this.addRootDrop}>( Новый корневой элемент )</List.Content>
 								</List.Item>
 							</List>									
 						</Grid.Column>

@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux'
 
 import * as types from './constants'
+import * as selectors from './selectors/structure'
 
 // constants
 personal_editor._maxSubjects = 12
@@ -135,9 +136,50 @@ function structure(state = preloadedState.structure, action) {
       }
     }
     case types.CHANGE_PLACE_PARENT: {
-      console.log(action.place, action.parent) 
-  
-      return { ...state }
+      const roots = [ ...state.roots ]
+      
+      const inserted = [ ...state.inserted ]
+
+      const updated = [ ...state.updated ]
+      const deleted = [ ...state.deleted ]
+
+      if (action.place.parent) {
+        const parent = action.place.parent
+
+        if (parent.places) {
+          const index = parent.places.indexOf(action.place.id)
+          if (index >= 0) {
+            parent.places.splice(index, 1)
+
+            parent.places.length === 0 && delete parent.places
+          }  
+        }
+
+        const oldRootId = selectors.placeRoot(action.place).id
+        updated.includes(oldRootId) || inserted.includes(oldRootId) || updated.push(oldRootId)
+      } else {
+        const index = roots.indexOf(action.place.id)
+        index >= 0 && roots.splice(index, 1)
+
+        deleted.includes(action.place.id) || deleted.push(action.place.id)
+      } 
+
+      if (action.parent) {
+        if (!action.parent.places) action.parent.places = []
+
+        action.parent.places.push(action.place.id)
+        action.place.parent = action.parent
+
+        const newRootId = selectors.placeRoot(action.parent).id
+        updated.includes(newRootId) || inserted.includes(newRootId) || updated.push(newRootId)
+      } else {
+        delete action.place.parent
+
+        roots.push(action.place.id)
+        inserted.includes(action.place.id) || inserted.push(action.place.id)
+      }
+
+      return { ...state, roots, inserted, updated, deleted }
     }
     case types.PLACE_PUTTED: {
       const inserted = [ ...state.inserted ]

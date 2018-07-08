@@ -1,11 +1,6 @@
 {
   "places": [
     {
-      "id": "1w18g4bzr5qhv36l",
-      "name": "Внешняя территория",
-      "maximum_control": 0
-    },
-    {
       "id": "1w18g4bzsoe2f6ue",
       "name": "Офис",
       "maximum_control": 0,
@@ -38,14 +33,14 @@
               "maximum_control": 100
             },
             {
-              "id": "1w18g4c0033dz5sl",
-              "name": "Комната 202",
-              "maximum_control": 200
-            },
-            {
               "id": "wyo4mmrxtxvr0rio",
               "name": "Комната 203",
               "maximum_control": 100
+            },
+            {
+              "id": "1w18g4c0033dz5sl",
+              "name": "Комната 202",
+              "maximum_control": 800
             }
           ]
         },
@@ -72,6 +67,11 @@
           ]
         }
       ]
+    },
+    {
+      "id": "1w18g4bzr5qhv36l",
+      "name": "Внешняя территория",
+      "maximum_control": 0
     }
   ],
   "subjects": [
