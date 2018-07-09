@@ -9,6 +9,14 @@ export function requestPlaces() {
 	}
 }
 
+export function placesFetched(places, at) {
+	return {
+		type: types.PLACES_FETCHED,
+		places,
+		at
+	}
+}
+/*
 export function placesFetched(roots, places, at) {
 	return {
 		type: types.PLACES_FETCHED,
@@ -17,7 +25,7 @@ export function placesFetched(roots, places, at) {
 		at
 	}
 }
-
+*/
 export function addPlace(place, rootId) {
 	return {
 		type: types.ADD_PLACE,

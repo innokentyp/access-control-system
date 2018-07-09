@@ -14,7 +14,9 @@ export const preloadedState = {
 
   structure: {
     roots: [], // Список корневых помещений
-    places: {},
+    //places: {},
+
+    places: [],
     at: 0,
     
     inserted: [],
@@ -52,7 +54,9 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [], deleted: [] }
+      //return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [], deleted: [] }
+
+      return { ...state, places: action.places, at: action.at }
     case types.ADD_PLACE: {
       const places = { ...state.places } 
       places[action.place.id] = action.place

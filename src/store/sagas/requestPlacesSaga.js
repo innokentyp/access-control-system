@@ -35,9 +35,11 @@ export function* fetchPlaces(action) {
     	}
     )
 
-    const normalizedData = yield call(getNormalizedData, response.data)
+    //const normalizedData = yield call(getNormalizedData, response.data)
 
-    yield put(placesFetched(normalizedData.result, normalizedData.entities.places, Date.now()))
+    //yield put(placesFetched(normalizedData.result, normalizedData.entities.places, Date.now()))
+
+    yield put(placesFetched(response.data, Date.now()))
   } catch (e) {   
     console.log(e.message) 
   }

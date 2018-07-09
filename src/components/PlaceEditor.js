@@ -10,13 +10,8 @@ import * as selectors from '../store/selectors/structure'
 class PlaceEditor extends Component {
 	constructor(props) {
 		super(props)
-		
-		const { 
-			match: { params: { id } }, 
-			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
-		} = props
 
-		this.state = { place: { ...place }, updated: false }
+		this.state = { place: { ...props.place }, updated: false }
 	}
 
 	save() {
@@ -33,12 +28,7 @@ class PlaceEditor extends Component {
 	UNSAFE_componentWillReceiveProps(nextProps) {
 		this.save()
 
-		const { 
-			match: { params: { id } }, 
-			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
-		} = nextProps
-
-		this.setState({ place: { ...place }, updated: false	})
+		this.setState({ place: { ...nextProps.place }, updated: false	})
 	}
 
 	placeNameChange = (e) => {
@@ -60,18 +50,13 @@ class PlaceEditor extends Component {
 	formPlaceReset = (e) => {
 		e.preventDefault()
 
-		const { 
-			match: { params: { id } }, 
-			structure: { places: { [id]: place = { id, name: id, maximum_control: 0 } } } 
-		} = this.props		
-
-		this.setState({ place: { ...place }, updated: false	})
+		this.setState({ place: { ...this.props.place }, updated: false	})
 	}
 
 	render() {
-		console.log(`render: ${this.constructor.name}`)
+		//console.log(`render: ${this.constructor.name}`)
 
-		const { match: { url, params: { id } }, structure: { places, places: { [id]: init_place = { id, name: id, maximum_control: 0 } } } } = this.props		
+		const { match: { url }, structure: { places }, place: init_place } = this.props
 		const { place, updated } = this.state
 		
 		// <pre>{JSON.stringify(place, null, 2)}</pre>
@@ -80,7 +65,7 @@ class PlaceEditor extends Component {
 			<Fragment>
 				<Breadcrumb>
 					{
-						selectors.placePath(init_place).map(
+						selectors.placePath(places, init_place).map(
 							(item, i, array) => (
 								i < array.length - 1
 								?
@@ -126,7 +111,7 @@ class PlaceEditor extends Component {
 										{ 	
 											place.places.map(
 												(item, i, array) => (
-													<List.Item key={item}><Link to={`${url}/${item}`}>{places[item].name}</Link></List.Item>											
+													<List.Item key={item.id}><Link to={`${url}/${item.id}`}>{item.name}</Link></List.Item>											
 												)
 											)
 										}							    
@@ -155,7 +140,8 @@ class PlaceEditor extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state)
+			structure: selectors.getStructure(state),
+			place: selectors.getPlace(state, props.match.params.id)
 		}
 	), 
 	dispatch => (

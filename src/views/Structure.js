@@ -124,14 +124,14 @@ class PlaceItem extends Component {
 
 class _ListOfPlaces extends Component {
 	render() {
-		const { location: { pathname }, match: { url, params: { id: parentId } }, structure: { places } } = this.props
+		const { location: { pathname }, match: { url, params: { id: parentId } }, places } = this.props
 				
 		return (
 			<List.List>
 				{
-					places[parentId].places.map(
-						(id, i) => {
-							const place = places[id] || { id, name: id }	
+					places.map(
+						(place, i) => {
+							const { id } = place
 							const expanded = pathname.includes(id) && place.places	
 
 							return (
@@ -158,7 +158,7 @@ class _ListOfPlaces extends Component {
 const ListOfPlaces = connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state)			
+			places: selectors.getChildren(state.structure.places, props.match.params.id)			
 		}
 	),
 	dispatch => (
@@ -173,7 +173,7 @@ class Structure extends Component {
 	
 	static getDerivedStateFromProps(props, state) {
 		const { location: { pathname }, structure: { at } } = props	
-
+		
 		if (at > 0) {
 			const match = pathname.match(new RegExp('\\w+', 'g'))
 
@@ -181,7 +181,8 @@ class Structure extends Component {
 				const length = match.length
 
 				while (match.length > 1) {
-					const { structure: { places: { [match[match.length - 1]]: place } } } = props
+					const { structure: { places } } = props
+					const place = selectors.getPlaceById(places, match[match.length - 1])
 
 					if (place) break
 
@@ -197,7 +198,7 @@ class Structure extends Component {
 				} 
 			}
 		}
-
+		
 		window.sessionStorage.setItem('places-selected-path', pathname)
 		
 		return null
@@ -222,19 +223,19 @@ class Structure extends Component {
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
-			const { structure: { places: { [parentId]: parent } }, actions: { addPlace }, history } = this.props
+			const { structure: { places }, actions: { addPlace }, history } = this.props
+			const parent = selectors.getPlaceById(parentId)
 
 			if (parent) {
 				const place = {
 					id,
 					name: name.trim(),
-					maximum_control: 0,
-					parent
+					maximum_control: 0
 				} 
 				
 				addPlace(place, selectors.placeRoot(place).id)
 
-				history.push('/structure/' + selectors.placePath(place).map(item => item.id).join('/'))
+				history.push('/structure/' + selectors.placePath(places, place).map(item => item.id).join('/'))
 			} else
 				alert('Невозможно определить владельца элемента!')
 		}
@@ -309,7 +310,7 @@ class Structure extends Component {
 
 		const data = e.dataTransfer.getData('text/plain')
 		
-		// Запрет переосить в корень корневой элемент
+		// Запрет переносить в корень корневой элемент
 		const re = new RegExp('\\w+', 'g')
 
 		if (data.match(re).length === 2) {
@@ -321,7 +322,7 @@ class Structure extends Component {
 	}
 
 	render() {
-		console.log(`render: ${this.constructor.name}`)		
+		//console.log(`render: ${this.constructor.name}`)		
 
 		const { structure: { roots, places, inserted, updated, deleted }, match, location: { pathname } } = this.props	
 		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
@@ -333,7 +334,7 @@ class Structure extends Component {
 					{
 						match 
 						?
-						<span style={{ color: 'orange' }}>{places[match.params.id] ? places[match.params.id].name : match.params.id}</span> 
+						<span style={{ color: 'orange' }}>{(id => { const place = selectors.getPlaceById(places, id); return place ? place.name : id })(match.params.id)}</span> 
 						:
 						'( Нет )'
 					}
@@ -343,7 +344,7 @@ class Structure extends Component {
 
 		return (
 			<Container as="section">
-				<Header as="h4">Структура</Header>
+				<Header as="h4">Структура помещений</Header>
 
 				<Menu secondary>
 					<Route path={path} children={
@@ -371,9 +372,9 @@ class Structure extends Component {
 						<Grid.Column width={6}>
 							<List>
 								{
-									roots.map(
-										(id, i) => {
-											const place = places[id] || { id, name: id }
+									places.map(
+										(place, i) => {
+											const { id } = place 	
 											const expanded = pathname.includes(id) && place.places
 
 											return (
@@ -390,7 +391,7 @@ class Structure extends Component {
 												</List.Item>
 											)
 										}
-									)
+									)									
 								}
 								<List.Item>
 									<List.Icon name="down triangle" style={{ visibility: 'hidden' }} />

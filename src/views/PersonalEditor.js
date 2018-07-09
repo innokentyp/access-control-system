@@ -6,7 +6,7 @@ import { Container, Breadcrumb, Segment, Form, Button, Icon, Message, List } fro
 
 import * as actions from '../store/actions/personal_editor'
 import { getSubject } from '../store/selectors/personal_editor'
-import { placePath } from '../store/selectors/structure'
+import { getStructure, placePath } from '../store/selectors/structure'
 
 class PersonalEditor extends Component {
 	constructor(props) {
@@ -130,7 +130,7 @@ class PersonalEditor extends Component {
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { subject } = this.props
+		const { subject, structure: { places } } = this.props
 
 		return (
 			<Container as="section">
@@ -190,7 +190,7 @@ class PersonalEditor extends Component {
 							<Form.Field width={12}>
 								<List bulleted horizontal>
 								{ 	
-									placePath(subject.place).map(
+									placePath(places, subject.place).map(
 										(item, i, array) => (
 											<List.Item key={i}>{i < array.length - 1 ? item.name : <Link to={`/structure/${array.map(item => item.id).join('/')}`}>{item.name}</Link>}</List.Item>											
 										)
@@ -220,7 +220,8 @@ class PersonalEditor extends Component {
 export default connect(
 	(state, props) => (
 		{
-			subject: getSubject(state, props.match.params.id)
+			subject: getSubject(state, props.match.params.id),
+			structure: getStructure(state)
 		}
 	),
 	dispatch => (
