@@ -54,33 +54,57 @@ function authentication(state = preloadedState.authentication, action) {
 function structure(state = preloadedState.structure, action) {
   switch (action.type) {    
     case types.PLACES_FETCHED:
-      //return { ...state, roots: action.roots, places: action.places, at: action.at, inserted: [], updated: [], deleted: [] }
+      return { ...state, places: action.places, at: action.at, inserted: [], updated: [], deleted: [] }
+    case types.ADD_PLACE: 
+    {
+      const places = JSON.parse(JSON.stringify(state.places))
 
-      return { ...state, places: action.places, at: action.at }
-    case types.ADD_PLACE: {
-      const places = { ...state.places } 
-      places[action.place.id] = action.place
+      if (action.parent) {
+        const parent = selectors.getPlaceById(places, action.parent.id)
 
-      if (action.place.parent) {
-        const parent = action.place.parent
-        parent.places ? parent.places.push(action.place.id) : (parent.places = [action.place.id])        
+        if (parent) {
+          parent.places ? parent.places.push(action.place) : (parent.places = [action.place])
 
-        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
-          return { ...state, places }
-        else        
-          return { ...state, places, updated: [ ...state.updated, action.rootId ] }
+          const path = selectors.placePath(parent, places)
+
+          if (path.length) {
+            const rootId = path[0].id
+
+            if (state.updated.includes(rootId) || state.inserted.includes(rootId))
+              return { ...state, places }
+            else        
+              return { ...state, places, updated: [ ...state.updated, rootId ] }
+          }
+        }
       } else {
-        return { ...state, roots: [ ...state.roots, action.rootId ], places, inserted: [ ...state.inserted, action.rootId ] }
-      }      
-    }  
-    case types.UPDATE_PLACE: {
-      const places = { ...state.places } 
-      places[action.id] = { ...places[action.id], ...action.data }      
+        places.push(action.place)
 
-      if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
-        return { ...state, places }
-      else        
-        return { ...state, places, updated: [ ...state.updated, action.rootId ] }
+        return { ...state, places, inserted: [ ...state.inserted, action.place.id ] }
+      }
+
+      return state
+    }  
+    case types.UPDATE_PLACE: 
+    {
+      const places = JSON.parse(JSON.stringify(state.places))
+      const place = selectors.getPlaceById(places, action.place.id)
+
+      if (place) {
+        Object.assign(place, action.data)  
+
+        const path = selectors.placePath(place, places)
+
+        if (path.length) {
+          const rootId = path[0].id
+
+          if (state.updated.includes(rootId) || state.inserted.includes(rootId))
+            return { ...state, places }
+          else        
+            return { ...state, places, updated: [ ...state.updated, rootId ] }
+        }
+      }
+
+      return state  
     }
     case types.DELETE_PLACE: {
       const places = { ...state.places }
@@ -139,7 +163,10 @@ function structure(state = preloadedState.structure, action) {
           return { ...state, roots, places, updated, deleted: [ ...state.deleted, action.rootId ] }
       }
     }
-    case types.CHANGE_PLACE_PARENT: {
+    case types.CHANGE_PLACE_PARENT: 
+      return state
+    /*
+    {
       const roots = [ ...state.roots ]
       
       const inserted = [ ...state.inserted ]
@@ -185,6 +212,7 @@ function structure(state = preloadedState.structure, action) {
 
       return { ...state, roots, inserted, updated, deleted }
     }
+    */
     case types.PLACE_PUTTED: {
       const inserted = [ ...state.inserted ]
 

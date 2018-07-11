@@ -124,7 +124,7 @@ class PlaceItem extends Component {
 
 class _ListOfPlaces extends Component {
 	render() {
-		const { location: { pathname }, match: { url, params: { id: parentId } }, places } = this.props
+		const { location: { pathname }, match: { url }, place: { places = [] } } = this.props
 				
 		return (
 			<List.List>
@@ -138,7 +138,7 @@ class _ListOfPlaces extends Component {
 								<List.Item key={id}>
 									<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
-										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} />
+										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} />
 						        {
 						        	expanded
 						        	&&
@@ -158,7 +158,7 @@ class _ListOfPlaces extends Component {
 const ListOfPlaces = connect(
 	(state, props) => (
 		{ 
-			places: selectors.getChildren(state.structure.places, props.match.params.id)			
+			place: selectors.getPlaceById(state.structure.places, props.match.params.id)
 		}
 	),
 	dispatch => (
@@ -218,41 +218,46 @@ class Structure extends Component {
 		requestPlaces()
 	}
 
-	static add(parentId) {
+	static add(parent) {
 		const id = create_uuid()
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
-			const { structure: { places }, actions: { addPlace }, history } = this.props
-			const parent = selectors.getPlaceById(parentId)
+			const { actions: { addPlace }, history } = this.props
 
-			if (parent) {
-				const place = {
-					id,
-					name: name.trim(),
-					maximum_control: 0
-				} 
-				
-				addPlace(place, selectors.placeRoot(place).id)
+			const place = {
+				id,
+				name: name.trim(),
+				maximum_control: 0
+			} 
 
-				history.push('/structure/' + selectors.placePath(places, place).map(item => item.id).join('/'))
-			} else
-				alert('Невозможно определить владельца элемента!')
+			addPlace(place, parent)
+
+			history.push('/structure/' + selectors.placePath(parent).map(item => item.id).join('/') + '/' + id)
 		}
 	}
 
 	addClick = (parentId) => (e) => {
-		e.preventDefault() 
+		e.preventDefault()
 
-		Structure.add.call(this, parentId)
+		const { structure: { places } } = this.props
+		const parent = selectors.getPlaceById(places, parentId)
+
+		if (parent) {
+			Structure.add.call(this, parent)
+
+		} else
+			alert('Невозможно определить владельца элемента!')		
 	}
 
 	static remove(id) {		
-		const { structure: { places: { [id]: place } }, location: { pathname }, history, actions: { deletePlace } } = this.props
+		const { location: { pathname }, history, actions: { deletePlace } } = this.props
+		/*
+		const place = selectors.getPlaceById(id)
 
 		if (place) {
 			if (window.confirm(`Выбросить ${place.name}?`))	{
-				deletePlace(place, selectors.placeRoot(place).id)
+				deletePlace(place, selectors.placePath(place)[0].id)
 
 				const index = pathname.indexOf(`/${id}`)
 
@@ -262,6 +267,7 @@ class Structure extends Component {
 			}
 		} else
 			alert('Невозможно найти элемент!')			
+		*/	
 	}	
 
 	deleteClick = (id) => (e) => {
@@ -293,7 +299,7 @@ class Structure extends Component {
 				maximum_control: 0
 			} 
 			
-			this.props.actions.addPlace(place, id)
+			this.props.actions.addPlace(place, null)
 
 			history.push('/structure/' + id)
 		}
@@ -324,7 +330,7 @@ class Structure extends Component {
 	render() {
 		//console.log(`render: ${this.constructor.name}`)		
 
-		const { structure: { roots, places, inserted, updated, deleted }, match, location: { pathname } } = this.props	
+		const { structure: { places, inserted, updated, deleted }, match, location: { pathname } } = this.props	
 		const path = pathname.match(new RegExp('structure/*$')) ? pathname + '/:id' : pathname.replace(new RegExp('\\w+/*$'), ':id')
 		
 		function trigger(match) {
@@ -381,7 +387,7 @@ class Structure extends Component {
 												<List.Item key={id}>
 													<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
-														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, id)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} /> 
+														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} /> 
 										        {
 										        	expanded
 										        	&&

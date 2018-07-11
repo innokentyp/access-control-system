@@ -18,7 +18,7 @@ class PlaceEditor extends Component {
 		const { place, updated } = this.state
 
 		if (updated)	
-			this.props.actions.updatePlace(place.id, place, selectors.placeRoot(place).id)		
+			this.props.actions.updatePlace(this.props.place, place)		
 	}
 
 	componentWillUnmount() {
@@ -56,7 +56,7 @@ class PlaceEditor extends Component {
 	render() {
 		//console.log(`render: ${this.constructor.name}`)
 
-		const { match: { url }, structure: { places }, place: init_place } = this.props
+		const { match: { url } } = this.props
 		const { place, updated } = this.state
 		
 		// <pre>{JSON.stringify(place, null, 2)}</pre>
@@ -65,7 +65,7 @@ class PlaceEditor extends Component {
 			<Fragment>
 				<Breadcrumb>
 					{
-						selectors.placePath(places, init_place).map(
+						selectors.placePath(this.props.place).map(
 							(item, i, array) => (
 								i < array.length - 1
 								?
@@ -140,7 +140,6 @@ class PlaceEditor extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			structure: selectors.getStructure(state),
 			place: selectors.getPlace(state, props.match.params.id)
 		}
 	), 

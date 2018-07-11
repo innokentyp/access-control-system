@@ -16,30 +16,20 @@ export function placesFetched(places, at) {
 		at
 	}
 }
-/*
-export function placesFetched(roots, places, at) {
-	return {
-		type: types.PLACES_FETCHED,
-		roots,
-		places,
-		at
-	}
-}
-*/
-export function addPlace(place, rootId) {
+
+export function addPlace(place, parent) {
 	return {
 		type: types.ADD_PLACE,
 		place,
-		rootId
+		parent
 	}
 }
 
-export function updatePlace(id, data, rootId) {
+export function updatePlace(place, data) {
 	return {
 		type: types.UPDATE_PLACE,
-		id,
-		data,
-		rootId
+		place,
+		data
 	}
 }
 
