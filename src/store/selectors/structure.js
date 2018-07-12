@@ -19,12 +19,12 @@ export function placePath(place, places = _store.getState().structure.places) {
 	return []
 }
 
-export function getPlaceById(places, id) {
+export function getPlaceById(id, places = _store.getState().structure.places) {
 	for (const item of places) {
 		if (item.id === id) return item 
 		
 		if (item.places) {
-			const child = getPlaceById(item.places, id)
+			const child = getPlaceById(id, item.places)
 
 			if (child) return child
 		}
@@ -45,11 +45,11 @@ export const getStructure = createSelector(
 )
 
 export const getPlace = createSelector(
-	[ (state, id) => state.structure, (state, id) => id ],
+	[ (structure, id) => structure, (structure, id) => id ],
 	(structure, id) => {
 		structure.at > 0 || _store.dispatch(requestPlaces())
 
-		return getPlaceById(structure.places, id) || { id, name: id, maximum_control: 0 }		
+		return getPlaceById(id, structure.places) || { id, name: id, maximum_control: 0 }		
 	}	
 )
 

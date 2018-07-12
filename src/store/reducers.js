@@ -60,7 +60,7 @@ function structure(state = preloadedState.structure, action) {
       const places = JSON.parse(JSON.stringify(state.places))
 
       if (action.parent) {
-        const parent = selectors.getPlaceById(places, action.parent.id)
+        const parent = selectors.getPlaceById(action.parent.id, places)
 
         if (parent) {
           parent.places ? parent.places.push(action.place) : (parent.places = [action.place])
@@ -87,7 +87,7 @@ function structure(state = preloadedState.structure, action) {
     case types.UPDATE_PLACE: 
     {
       const places = JSON.parse(JSON.stringify(state.places))
-      const place = selectors.getPlaceById(places, action.place.id)
+      const place = selectors.getPlaceById(action.place.id, places)
 
       if (place) {
         Object.assign(place, action.data)  
@@ -107,112 +107,121 @@ function structure(state = preloadedState.structure, action) {
       return state  
     }
     case types.DELETE_PLACE: {
-      const places = { ...state.places }
-      
-      function deletePlace(id) {
-        const place = places[id]
+      const places = JSON.parse(JSON.stringify(state.places))
+      const path = selectors.placePath(action.place, places)
 
-        if (place) {
-          if (place.places) {
-            place.places.forEach(item => { deletePlace(item) })
+      if (path.length) {      
+        if (path.length > 1) {
+          const parent = path[path.length - 2]
+          
+          if (parent.places) {
+            const index = parent.places.findIndex(item => item.id === action.place.id)
 
-            delete place.places
-          }
+            if (index >= 0) {
+              parent.places.splice(index, 1)
 
-          delete places[id]
+              parent.places.length === 0 && delete parent.places
+            }
+          } 
+
+          const rootId = path[0].id  
+
+          if (state.updated.includes(rootId) || state.inserted.includes(rootId))
+            return { ...state, places }
+          else        
+            return { ...state, places, updated: [ ...state.updated, rootId ] }
+        } else {
+          let index = places.findIndex(item => item.id === action.place.id)
+          index >= 0 && places.splice(index, 1)
+
+          const updated = [ ...state.updated ]
+
+          index = updated.indexOf(action.place.id)
+          index >= 0 && updated.splice(index, 1)
+
+          if (state.inserted.includes(action.place.id)) {
+            const inserted = [ ...state.inserted ]
+
+            index = inserted.indexOf(action.place.id)
+            index >= 0 && inserted.splice(index, 1)
+
+            return { ...state, places, updated, inserted }
+          } else
+            return { ...state, places, updated, deleted: [ ...state.deleted, action.place.id ] }
         }
       }
 
-      deletePlace(action.place.id)
-      
-      if (action.place.parent) {
-        const parent = action.place.parent
-        
-        if (parent.places) {
-          const index = parent.places.indexOf(action.place.id)
-          if (index >= 0) {
-            parent.places.splice(index, 1)
-
-            parent.places.length === 0 && delete parent.places
-          }
-        } 
-
-        if (state.updated.includes(action.rootId) || state.inserted.includes(action.rootId))
-          return { ...state, places }
-        else        
-          return { ...state, places, updated: [ ...state.updated, action.rootId ] }
-      } else {
-        const roots = [ ...state.roots ]
-
-        let index = roots.indexOf(action.rootId)
-        index >= 0 && roots.splice(index, 1)
-
-        const updated = [ ...state.updated ]
-
-        index = updated.indexOf(action.rootId)
-        index >= 0 && updated.splice(index, 1)
-
-        if (state.inserted.includes(action.rootId)) {
-          const inserted = [ ...state.inserted ]
-
-          index = inserted.indexOf(action.rootId)
-          index >= 0 && inserted.splice(index, 1)
-
-          return { ...state, roots, places, updated, inserted }
-        } else
-          return { ...state, roots, places, updated, deleted: [ ...state.deleted, action.rootId ] }
-      }
-    }
-    case types.CHANGE_PLACE_PARENT: 
       return state
-    /*
+    }
+    case types.CHANGE_PLACE_PARENT:
     {
-      const roots = [ ...state.roots ]
-      
-      const inserted = [ ...state.inserted ]
+      const places = JSON.parse(JSON.stringify(state.places))
 
       const updated = [ ...state.updated ]
       const deleted = [ ...state.deleted ]
+      const inserted = [ ...state.inserted ]
+     
+      const path = selectors.placePath(action.place, places)
 
-      if (action.place.parent) {
-        const parent = action.place.parent
+      if (path.length) {
+        if (path.length > 1) {
+          const parent = path[path.length - 2]
 
-        if (parent.places) {
-          const index = parent.places.indexOf(action.place.id)
-          if (index >= 0) {
-            parent.places.splice(index, 1)
+          if (parent.places) {
+            const index = parent.places.findIndex(item => item.id === action.place.id)
 
-            parent.places.length === 0 && delete parent.places
-          }  
+            if (index >= 0) {
+              parent.places.splice(index, 1)
+
+              parent.places.length || delete parent.places
+            }
+          }
+
+          const rootId = path[0].id  
+          updated.includes(rootId) || inserted.includes(rootId) || updated.push(rootId)
+        } else {
+          let index = places.findIndex(item => item.id === action.place.id)
+          index >= 0 && places.splice(index, 1)
+
+          index = updated.indexOf(action.place.id)
+          index >= 0 && updated.splice(index, 1)
+
+          index = inserted.indexOf(action.place.id)
+          if (index >= 0) 
+            inserted.splice(index, 1)
+          else
+            deleted.includes(action.place.id) || deleted.push(action.place.id)
         }
 
-        const oldRootId = selectors.placeRoot(action.place).id
-        updated.includes(oldRootId) || inserted.includes(oldRootId) || updated.push(oldRootId)
-      } else {
-        const index = roots.indexOf(action.place.id)
-        index >= 0 && roots.splice(index, 1)
+        const place = path[path.length - 1]
 
-        deleted.includes(action.place.id) || deleted.push(action.place.id)
-      } 
+        if (action.parent) {
+          const newPath = selectors.placePath(action.parent, places)
 
-      if (action.parent) {
-        if (!action.parent.places) action.parent.places = []
+          if (newPath.length) {
+            const parent = newPath[newPath.length - 1]
 
-        action.parent.places.push(action.place.id)
-        action.place.parent = action.parent
+            parent.places ? parent.places.push(place) : (parent.places = [place])
+        
+            const rootId = newPath[0].id  
+            updated.includes(rootId) || inserted.includes(rootId) || updated.push(rootId)
 
-        const newRootId = selectors.placeRoot(action.parent).id
-        updated.includes(newRootId) || inserted.includes(newRootId) || updated.push(newRootId)
-      } else {
-        delete action.place.parent
+            return { ...state, places, updated, deleted, inserted }
+          }
+        } else {
+          places.push(place)
 
-        roots.push(action.place.id)
-        inserted.includes(action.place.id) || inserted.push(action.place.id)
+          const index = updated.indexOf(place.id)
+          index >= 0 && updated.splice(index, 1)
+
+          inserted.includes(place.id) || inserted.push(place.id)
+
+          return { ...state, places, updated, deleted, inserted }
+        }
       }
 
-      return { ...state, roots, inserted, updated, deleted }
+      return state
     }
-    */
     case types.PLACE_PUTTED: {
       const inserted = [ ...state.inserted ]
 

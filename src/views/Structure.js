@@ -138,7 +138,7 @@ class _ListOfPlaces extends Component {
 								<List.Item key={id}>
 									<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 									<List.Content>
-										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} />
+										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, place)} change={Structure.change.bind(this, place)} />
 						        {
 						        	expanded
 						        	&&
@@ -158,7 +158,7 @@ class _ListOfPlaces extends Component {
 const ListOfPlaces = connect(
 	(state, props) => (
 		{ 
-			place: selectors.getPlaceById(state.structure.places, props.match.params.id)
+			place: selectors.getPlaceById(props.match.params.id)
 		}
 	),
 	dispatch => (
@@ -181,12 +181,11 @@ class Structure extends Component {
 				const length = match.length
 
 				while (match.length > 1) {
-					const { structure: { places } } = props
-					const place = selectors.getPlaceById(places, match[match.length - 1])
+					const place = selectors.getPlaceById(match[match.length - 1])
 
 					if (place) break
 
-					match.splice(match.length - 1)	
+					match.pop()	
 				}
 				
 				if (match.length < length) {
@@ -240,8 +239,7 @@ class Structure extends Component {
 	addClick = (parentId) => (e) => {
 		e.preventDefault()
 
-		const { structure: { places } } = this.props
-		const parent = selectors.getPlaceById(places, parentId)
+		const parent = selectors.getPlaceById(parentId)
 
 		if (parent) {
 			Structure.add.call(this, parent)
@@ -250,38 +248,40 @@ class Structure extends Component {
 			alert('Невозможно определить владельца элемента!')		
 	}
 
-	static remove(id) {		
-		const { location: { pathname }, history, actions: { deletePlace } } = this.props
-		/*
-		const place = selectors.getPlaceById(id)
+	static remove(place) {		
+		if (window.confirm(`Выбросить ${place.name}?`))	{
+			const { location: { pathname }, history, actions: { deletePlace } } = this.props
+			const { id } = place 
 
-		if (place) {
-			if (window.confirm(`Выбросить ${place.name}?`))	{
-				deletePlace(place, selectors.placePath(place)[0].id)
+			deletePlace(place)
 
-				const index = pathname.indexOf(`/${id}`)
+			const index = pathname.indexOf(`/${id}`)
 
-				if (index >= 0) {
-					history.push(pathname.slice(0, index))
-				}				
-			}
-		} else
-			alert('Невозможно найти элемент!')			
-		*/	
+			if (index >= 0) history.replace(pathname.slice(0, index))
+		}	
 	}	
 
 	deleteClick = (id) => (e) => {
 		e.preventDefault()
 
-		Structure.remove.call(this, id)
+		const place = selectors.getPlaceById(id)
+
+		if (place) {
+			Structure.remove.call(this, place)
+
+		} else
+			alert('Невозможно найти элемент!')
 	}
 
 	static change(parent, newChildPath) {
 		const match = newChildPath.match(new RegExp('\\w+', 'g'))
 		
-		const { structure: { places: { [match[match.length - 1]]: place } }, actions: { changePlaceParent } } = this.props
+		const { actions: { changePlaceParent } } = this.props
+		const place = selectors.getPlaceById(match[match.length - 1])
 
-		changePlaceParent(place, parent)
+		if (place) {
+			changePlaceParent(place, parent)
+		}	
 	}
 
 	addRootClick = (e) => {
@@ -340,7 +340,7 @@ class Structure extends Component {
 					{
 						match 
 						?
-						<span style={{ color: 'orange' }}>{(id => { const place = selectors.getPlaceById(places, id); return place ? place.name : id })(match.params.id)}</span> 
+						<span style={{ color: 'orange' }}>{(id => { const place = selectors.getPlaceById(id); return place ? place.name : id })(match.params.id)}</span> 
 						:
 						'( Нет )'
 					}
@@ -387,7 +387,7 @@ class Structure extends Component {
 												<List.Item key={id}>
 													<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
 													<List.Content>
-														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, id)} change={Structure.change.bind(this, place)} /> 
+														<PlaceItem to={`${match.url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, place)} change={Structure.change.bind(this, place)} /> 
 										        {
 										        	expanded
 										        	&&

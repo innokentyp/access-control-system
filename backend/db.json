@@ -71,7 +71,14 @@
     {
       "id": "1w18g4bzr5qhv36l",
       "name": "Внешняя территория",
-      "maximum_control": 0
+      "maximum_control": 0,
+      "places": [
+        {
+          "id": "d36bms3i9rnka71b",
+          "name": "Ворота",
+          "maximum_control": 0
+        }
+      ]
     }
   ],
   "subjects": [

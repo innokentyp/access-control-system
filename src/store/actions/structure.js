@@ -1,7 +1,7 @@
-import { denormalize, schema } from 'normalizr'
 import axios from 'axios'
 
 import * as types from '../constants'
+import * as selectors from '../selectors/structure'
 
 export function requestPlaces() {
 	return {
@@ -33,11 +33,10 @@ export function updatePlace(place, data) {
 	}
 }
 
-export function deletePlace(place, rootId) {
+export function deletePlace(place) {
 	return {
 		type: types.DELETE_PLACE,
-		place,
-		rootId
+		place
 	}
 }
 
@@ -72,25 +71,13 @@ export function placeDeleted(id) {
 
 export function post() {
 	return (dispatch, getState) => {
-		const { structure: { inserted } } = getState()
-		const places = {} 
-
-		Object.values(getState().structure.places).forEach(
-			place => {
-				places[place.id] = { ...place }
-
-				delete places[place.id].parent
-			}
-		)			
-
-		const place_schema = new schema.Entity('places')
-		place_schema.define({ places: [ place_schema ] })
-
-		const data = denormalize({ places: inserted }, { places: [ place_schema ] }, { places })
-
+		const { structure: { places, inserted } } = getState()
+		
 		return Promise.all(
-			data.places.map(
-				place => {
+			inserted.map(
+				id => {
+					const place = selectors.getPlaceById(id, places)
+
 					return axios
 						.post(
 							`http://localhost:8000/places`,
@@ -115,27 +102,13 @@ export function post() {
 
 export function patch() {
 	return (dispatch, getState) => {
-		const { structure: { updated } } = getState()
-		const places = {} 
-
-		Object.values(getState().structure.places).forEach(
-			place => {
-				places[place.id] = { ...place }
-
-				delete places[place.id].parent
-			}
-		)			
-
-		const place_schema = new schema.Entity('places')
-		place_schema.define({ places: [ place_schema ] })
-
-		const data = denormalize({ places: updated }, { places: [ place_schema ] }, { places })
-
-		//console.dir(data)
+		const { structure: { places, updated } } = getState()
 
 		return Promise.all(
-			data.places.map(
-				place => {
+			updated.map(
+				id => {
+					const place = selectors.getPlaceById(id, places)
+
 					return axios
 						.patch(
 							`http://localhost:8000/places/${place.id}`,

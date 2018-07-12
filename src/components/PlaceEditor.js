@@ -140,7 +140,7 @@ class PlaceEditor extends Component {
 export default connect(
 	(state, props) => (
 		{ 
-			place: selectors.getPlace(state, props.match.params.id)
+			place: selectors.getPlace(state.structure, props.match.params.id)
 		}
 	), 
 	dispatch => (
