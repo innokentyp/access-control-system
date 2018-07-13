@@ -13,15 +13,9 @@ export const preloadedState = {
   },
 
   structure: {
-    roots: [], // Список корневых помещений
-    //places: {},
-
     places: [],
-    at: 0,
-    
-    inserted: [],
-    updated: [],
-    deleted: []
+    at: 0,    
+    inserted: [], updated: [], deleted: []
   },
 
   personal: {
