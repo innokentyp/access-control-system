@@ -1,12 +1,17 @@
 import React from 'react'
+//import { render, unmountComponentAtNode } from 'react-dom'
+//import ReactTestUtils from 'react-dom/test-utils'
 import { Link } from 'react-router-dom'
+import { withRouter } from 'react-router'
 
 import { configure, shallow, mount } from 'enzyme'
 import Adapter from 'enzyme-adapter-react-16'
 
-import { createStore } from 'redux'
+//import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
+
+import configureMockStore from 'redux-mock-store'
 
 import App from './App'
 import Home from './views/Home'
@@ -14,7 +19,10 @@ import Login from './views/Login'
 import Passages from './views/Passages'
 import NoMatch from './views/NoMatch'
 
-import reducer, { preloadedState } from './store/reducers'
+import /*reducer, */{ preloadedState } from './store/reducers'
+
+const middlewares = []
+const mockStore = configureMockStore(middlewares)
 
 configure({ adapter: new Adapter() })
 
@@ -29,7 +37,7 @@ describe('App',
 		it('navigate to public route without logged in', 
 			() => {
 				const wrapper = mount(
-					<Provider store={createStore(reducer, preloadedState)}>
+					<Provider store={mockStore(preloadedState)}>
 						<MemoryRouter initialEntries={[ '/' ]}>
 							<App />
 						</MemoryRouter>
@@ -43,7 +51,7 @@ describe('App',
 		it('show login if navigate to private route', 
 			() => {
 				const wrapper = mount(
-					<Provider store={createStore(reducer, preloadedState)}>
+					<Provider store={mockStore(preloadedState)}>
 						<MemoryRouter initialEntries={[ '/passages' ]}>
 							<App />
 						</MemoryRouter>
@@ -67,7 +75,7 @@ describe('App',
 				}
 
 				const wrapper = mount(
-					<Provider store={createStore(reducer, state)}>
+					<Provider store={mockStore(state)}>
 						<MemoryRouter initialEntries={[ '/passages' ]}>
 							<App />
 						</MemoryRouter>
@@ -81,7 +89,7 @@ describe('App',
 		it('navigate to no match if route no match', 
 			() => {
 				const wrapper = mount(
-					<Provider store={createStore(reducer, preloadedState)}>
+					<Provider store={mockStore(preloadedState)}>
 						<MemoryRouter initialEntries={[ '/qwerty' ]}>
 							<App />
 						</MemoryRouter>
@@ -103,26 +111,78 @@ describe('App',
 				    }
 				  }
 				}
+				
+				const Assert = withRouter(
+					class _Assert extends React.Component {
+						componentDidMount() {
+							const { location: { pathname }, history } = this.props
+
+							expect(pathname).toMatch(new RegExp('/$'))
+
+							history.push('/passages')
+						}
+
+						componentDidUpdate() {
+							const { location: { pathname } } = this.props
+
+							expect(pathname).toMatch(new RegExp('/passages$'))
+						}
+
+						render = () => <App />						
+					}
+				) 
 
 				const wrapper = mount(
-					<Provider store={createStore(reducer, state)}>
+					<Provider store={mockStore(state)}>
 						<MemoryRouter initialEntries={[ '/' ]}>
-							<App />
+							<Assert />
 						</MemoryRouter>
 					</Provider>
 				)
 
-				expect(wrapper.find(Home)).toHaveLength(1)
+				expect(wrapper.find('Link[to="/passages"]')).toHaveLength(1)
+				expect(wrapper.find(Passages)).toHaveLength(1)
 
-				const link = wrapper.find(Link).filter('[to="/passages"]')
-				expect(link).toHaveLength(1)				
+				/*
+				const div = document.createElement('div')
 
-				link.simulate('click')
-				wrapper.update()
+				class _Assert extends React.Component {
+					componentDidMount() {
+						const { location: { pathname }, history } = this.props
 
-				//console.log(wrapper.debug())
+						console.log(`1: ${pathname}`)
 
-				//expect(wrapper.find(Passages)).toHaveLength(1)
+						const link = div.querySelector('[href="/passages"]')
+						expect(link).not.toBeNull()
+
+						//ReactTestUtils.Simulate.click(link)
+						history.push('/passages')
+					}
+
+					componentDidUpdate() {
+						const { location: { pathname } } = this.props
+
+						console.log(`2: ${pathname}`)
+
+						expect(pathname).toMatch(new RegExp('/passages$'))
+					}
+
+					render = () => <App />						
+				}
+
+				const Assert = withRouter(_Assert) 
+
+				render(
+					<Provider store={createStore(reducer, state)}>
+						<MemoryRouter initialEntries={[ '/' ]}>
+							<Assert />
+						</MemoryRouter>
+					</Provider>, 
+					div
+				)
+
+				unmountComponentAtNode(div)
+				*/
 			}
 		)		
 
