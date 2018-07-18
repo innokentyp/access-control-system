@@ -12,12 +12,10 @@ export default function configureStore() {
 	// create the saga middleware
 	const sagaMiddleware = createSagaMiddleware()
 
-	_store = createStore(reducer, preloadedState, applyMiddleware(thunkMiddleware, sagaMiddleware, createLogger()))  
+	const store = createStore(reducer, preloadedState, applyMiddleware(thunkMiddleware, sagaMiddleware, createLogger()))  
 
 	// then run the saga
 	sagaMiddleware.run(rootSaga)
 
-	return _store
+	return store
 }
-
-export var _store = null

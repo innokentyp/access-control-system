@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App renders without crashing 1`] = `
+<React.Fragment>
+  <withRouter(Connect(Navigation)) />
+  <Switch>
+    <Route
+      component={[Function]}
+      exact={true}
+      path="/"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/passages"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/archive"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/structure"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      exact={true}
+      path="/personal"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/personal/new"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/personal/:id"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/access"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/accounting"
+    />
+    <Connect(PrivateRoute)
+      component={[Function]}
+      path="/security"
+    />
+    <Route
+      component={[Function]}
+      exact={true}
+      path="/login"
+    />
+    <Route
+      component={[Function]}
+    />
+  </Switch>
+</React.Fragment>
+`;

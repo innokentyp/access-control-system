@@ -4,12 +4,13 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { withRouter } from 'react-router'
 
-import { configure, shallow, mount } from 'enzyme'
-import Adapter from 'enzyme-adapter-react-16'
-
 //import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
+
+import { configure, shallow, mount } from 'enzyme'
+import Adapter from 'enzyme-adapter-react-16'
+import toJson from 'enzyme-to-json'
 
 import configureMockStore from 'redux-mock-store'
 
@@ -30,7 +31,9 @@ describe('App',
 	() => {
 		it('renders without crashing', 
 			() => {
-			  shallow(<App />)			  
+			  const wrapper = shallow(<App />)
+
+			  expect(toJson(wrapper)).toMatchSnapshot()			  
 			}
 		)
 

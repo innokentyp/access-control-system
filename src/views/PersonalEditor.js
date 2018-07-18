@@ -130,7 +130,7 @@ class PersonalEditor extends Component {
 	render() {
 		console.log(`render: ${this.constructor.name}`)
 
-		const { subject } = this.props
+		const { structure: { places } , subject } = this.props
 
 		return (
 			<Container as="section">
@@ -190,7 +190,7 @@ class PersonalEditor extends Component {
 							<Form.Field width={12}>
 								<List bulleted horizontal>
 								{ 	
-									placePath(subject.place).map(
+									placePath(subject.place, places).map(
 										(item, i, array) => (
 											<List.Item key={i}>{i < array.length - 1 ? item.name : <Link to={`/structure/${array.map(item => item.id).join('/')}`}>{item.name}</Link>}</List.Item>											
 										)
@@ -217,15 +217,13 @@ class PersonalEditor extends Component {
 	}	
 }
 
-export default connect(
-	(state, props) => (
-		{
-			subject: getSubject(state, props.match.params.id)
-		}
-	),
-	dispatch => (
-		{
-			actions: bindActionCreators(actions, dispatch)
-		}
+export default connect(state => ({ state }), dispatch => ({ dispatch }),
+	(stateProps, dispatchProps, ownProps) => ( 
+		{ 
+			...ownProps,
+			structure: stateProps.state.structure,
+			subject: getSubject(stateProps.state, ownProps.match.params.id, dispatchProps.dispatch),			
+			actions: bindActionCreators(actions, dispatchProps.dispatch)
+		}	
 	)
 )(PersonalEditor)

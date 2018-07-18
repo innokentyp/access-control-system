@@ -1,6 +1,5 @@
 import { createSelector } from 'reselect'
 
-import { _store } from '../'
 import { requestSubjects } from '../actions/personal'
 
 export function getQuery(state) {
@@ -8,11 +7,11 @@ export function getQuery(state) {
 }
 
 export const getSubjects = createSelector(
-	[ state => state.personal.subjects, state => state.personal.at ],
-	(subjects, at) => {
+	[ (state, dispatch) => state.personal.subjects, (state, dispatch) => state.personal.at, (state, dispatch) => dispatch ],
+	(subjects, at, dispatch) => {
 		console.log('getSubjects')
 
-		at > 0 || _store.dispatch(requestSubjects())
+		at > 0 || dispatch(requestSubjects())
 		
 		return subjects.map(item => ({ ...item, created_at: new Date(item.created_at), updated_at: new Date(item.updated_at) }))
 	}	

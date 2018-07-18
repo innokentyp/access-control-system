@@ -65,7 +65,7 @@ class PlaceEditor extends Component {
 			<Fragment>
 				<Breadcrumb>
 					{
-						selectors.placePath(this.props.place).map(
+						selectors.placePath(this.props.place, this.props.structure.places).map(
 							(item, i, array) => (
 								i < array.length - 1
 								?
@@ -137,15 +137,13 @@ class PlaceEditor extends Component {
 	}
 }
 
-export default connect(
-	(state, props) => (
+export default connect(state => ({ state }), dispatch => ({ dispatch }),
+	(stateProps, dispatchProps, ownProps) => (
 		{ 
-			place: selectors.getPlace(state.structure, props.match.params.id)
-		}
-	), 
-	dispatch => (
-		{ 
-			actions: bindActionCreators(actions, dispatch)		
-		}
+			...ownProps,
+			structure: stateProps.state.structure,
+			place: selectors.getPlace(stateProps.state.structure, ownProps.match.params.id, dispatchProps.dispatch),
+			actions: bindActionCreators(actions, dispatchProps.dispatch)
+		}	
 	)
 ) (PlaceEditor)

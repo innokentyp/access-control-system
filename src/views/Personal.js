@@ -206,16 +206,13 @@ class Personal extends Component {
 	}
 }
 
-export default connect(
-	(state, props) => (
+export default connect(state => ({ state }), dispatch => ({ dispatch }),
+	(stateProps, dispatchProps, ownProps) => (
 		{ 
-			query: selectors.getQuery(state),
-			subjects: selectors.getSubjects(state)				
-		}
-	), 
-	dispatch => (
-		{ 
-			actions: bindActionCreators(actions, dispatch)		
-		}
+			...ownProps,
+			query: selectors.getQuery(stateProps.state),
+			subjects: selectors.getSubjects(stateProps.state, dispatchProps.dispatch),  
+			actions: bindActionCreators(actions, dispatchProps.dispatch)
+		}	
 	)
 )(Personal) 

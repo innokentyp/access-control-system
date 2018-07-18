@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Structure renders without crashing 1`] = `
+<Container
+  as="section"
+>
+  <Header
+    as="h4"
+  >
+    Структура помещений
+  </Header>
+  <Menu
+    secondary={true}
+  >
+    <Route
+      path="/structure/:id"
+    />
+  </Menu>
+  <Grid
+    stackable={true}
+  >
+    <GridRow>
+      <GridColumn
+        width={6}
+      >
+        <List>
+          <ListItem
+            key="1w18g4bzr5qhv36l"
+          >
+            <ListIcon
+              color="grey"
+              name="right angle"
+              style={
+                Object {
+                  "visibility": "hidden",
+                }
+              }
+            />
+            <ListContent>
+              <PlaceItem
+                add={[Function]}
+                change={[Function]}
+                name="Внешняя территория"
+                remove={[Function]}
+                to="/structure/1w18g4bzr5qhv36l"
+              />
+            </ListContent>
+          </ListItem>
+          <ListItem
+            key="1w18g4bzsoe2f6ue"
+          >
+            <ListIcon
+              color="grey"
+              name="right angle"
+              style={
+                Object {
+                  "visibility": "visible",
+                }
+              }
+            />
+            <ListContent>
+              <PlaceItem
+                add={[Function]}
+                change={[Function]}
+                name="Офис"
+                remove={[Function]}
+                to="/structure/1w18g4bzsoe2f6ue"
+              />
+            </ListContent>
+          </ListItem>
+          <ListItem>
+            <ListIcon
+              name="down triangle"
+              style={
+                Object {
+                  "visibility": "hidden",
+                }
+              }
+            />
+            <ListContent
+              as="a"
+              href="/structure"
+              onClick={[Function]}
+              onDragOver={[Function]}
+              onDrop={[Function]}
+            >
+              ( Новый корневой элемент )
+            </ListContent>
+          </ListItem>
+        </List>
+      </GridColumn>
+      <GridColumn
+        style={
+          Object {
+            "minHeight": "215px",
+          }
+        }
+        width={10}
+      >
+        <Route
+          component={[Function]}
+          path="/structure/:id"
+        />
+      </GridColumn>
+    </GridRow>
+    <GridRow>
+      <GridColumn>
+        <Button
+          as="button"
+          disabled={true}
+          onClick={[Function]}
+          positive={true}
+          role="button"
+        >
+          <Icon
+            as="i"
+            name="check"
+          />
+           Записать
+        </Button>
+        <Button
+          as="button"
+          negative={false}
+          onClick={[Function]}
+          role="button"
+        >
+          <Icon
+            as="i"
+            name="refresh"
+          />
+           Обновить
+        </Button>
+      </GridColumn>
+    </GridRow>
+    <GridRow>
+      <GridColumn
+        width={5}
+      >
+        Inserted:
+        <pre>
+          []
+        </pre>
+      </GridColumn>
+      <GridColumn
+        width={5}
+      >
+        Updated:
+        <pre>
+          []
+        </pre>
+      </GridColumn>
+      <GridColumn
+        width={6}
+      >
+        Deleted:
+        <pre>
+          []
+        </pre>
+      </GridColumn>
+    </GridRow>
+  </Grid>
+</Container>
+`;

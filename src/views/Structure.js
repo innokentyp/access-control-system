@@ -122,43 +122,11 @@ class PlaceItem extends Component {
 	}
 }
 
-class _ListOfPlaces extends Component {
-	render() {
-		const { location: { pathname }, match: { url }, place: { places = [] } } = this.props
-				
-		return (
-			<List.List>
-				{
-					places.map(
-						(place, i) => {
-							const { id } = place
-							const expanded = pathname.includes(id) && place.places	
-
-							return (
-								<List.Item key={id}>
-									<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
-									<List.Content>
-										<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, place)} change={Structure.change.bind(this, place)} />
-						        {
-						        	expanded
-						        	&&
-						        	<Route path={`${url}/:id`} component={ListOfPlaces} />
-						        }	
-						      </List.Content>
-								</List.Item>
-							)
-						}
-					)
-				}				
-			</List.List>
-		)
-	}
-}
-
 const ListOfPlaces = connect(
-	(state, props) => (
+	(state, ownProps) => (
 		{ 
-			place: selectors.getPlaceById(props.match.params.id)
+			structure: state.structure,
+			place: selectors.getPlaceById(ownProps.match.params.id, state.structure.places)
 		}
 	),
 	dispatch => (
@@ -166,13 +134,46 @@ const ListOfPlaces = connect(
 			actions: bindActionCreators(actions, dispatch)
 		}
 	)
-) (_ListOfPlaces)
+) (
+	class extends Component {
+		render() {
+			const { location: { pathname }, match: { url }, place: { places = [] } } = this.props
+					
+			return (
+				<List.List>
+					{
+						places.map(
+							(place, i) => {
+								const { id } = place
+								const expanded = pathname.includes(id) && place.places	
 
-class Structure extends Component {
+								return (
+									<List.Item key={id}>
+										<List.Icon color="grey" name={`${expanded  ? 'down' : 'right'} angle`} style={{ visibility: place.places ? 'visible' : 'hidden' }} />						
+										<List.Content>
+											<PlaceItem to={`${url}/${id}`} name={place.name} add={Structure.add.bind(this, place)} remove={Structure.remove.bind(this, place)} change={Structure.change.bind(this, place)} />
+							        {
+							        	expanded
+							        	&&
+							        	<Route path={`${url}/:id`} component={ListOfPlaces} />
+							        }	
+							      </List.Content>
+									</List.Item>
+								)
+							}
+						)
+					}				
+				</List.List>
+			)
+		}
+	}
+)
+
+export class Structure extends Component {
 	state = { }
 	
 	static getDerivedStateFromProps(props, state) {
-		const { location: { pathname }, structure: { at } } = props	
+		const { location: { pathname }, structure: { at, places } } = props	
 		
 		if (at > 0) {
 			const match = pathname.match(new RegExp('\\w+', 'g'))
@@ -181,7 +182,7 @@ class Structure extends Component {
 				const length = match.length
 
 				while (match.length > 1) {
-					const place = selectors.getPlaceById(match[match.length - 1])
+					const place = selectors.getPlaceById(match[match.length - 1], places)
 
 					if (place) break
 
@@ -222,7 +223,7 @@ class Structure extends Component {
 		const name = prompt('Введите название элемента', `Элемент ${id}`)
 
 		if (name) {
-			const { actions: { addPlace }, history } = this.props
+			const { structure: { places }, actions: { addPlace }, history } = this.props
 
 			const place = {
 				id,
@@ -232,14 +233,14 @@ class Structure extends Component {
 
 			addPlace(place, parent)
 
-			history.push('/structure/' + selectors.placePath(parent).map(item => item.id).join('/') + '/' + id)
+			history.push('/structure/' + selectors.placePath(parent, places).map(item => item.id).join('/') + '/' + id)
 		}
 	}
 
 	addClick = (parentId) => (e) => {
 		e.preventDefault()
 
-		const parent = selectors.getPlaceById(parentId)
+		const parent = selectors.getPlaceById(parentId, this.props.structure.places)
 
 		if (parent) {
 			Structure.add.call(this, parent)
@@ -264,7 +265,7 @@ class Structure extends Component {
 	deleteClick = (id) => (e) => {
 		e.preventDefault()
 
-		const place = selectors.getPlaceById(id)
+		const place = selectors.getPlaceById(id, this.props.structure.places)
 
 		if (place) {
 			Structure.remove.call(this, place)
@@ -276,8 +277,8 @@ class Structure extends Component {
 	static change(parent, newChildPath) {
 		const match = newChildPath.match(new RegExp('\\w+', 'g'))
 		
-		const { actions: { changePlaceParent } } = this.props
-		const place = selectors.getPlaceById(match[match.length - 1])
+		const { structure: { places }, actions: { changePlaceParent } } = this.props
+		const place = selectors.getPlaceById(match[match.length - 1], places)
 
 		if (place) {
 			changePlaceParent(place, parent)
@@ -340,7 +341,7 @@ class Structure extends Component {
 					{
 						match 
 						?
-						<span style={{ color: 'orange' }}>{(id => { const place = selectors.getPlaceById(id); return place ? place.name : id })(match.params.id)}</span> 
+						<span style={{ color: 'orange' }}>{(id => { const place = selectors.getPlaceById(id, places); return place ? place.name : id })(match.params.id)}</span> 
 						:
 						'( Нет )'
 					}
@@ -438,15 +439,12 @@ class Structure extends Component {
 	}	
 }
 
-export default connect(
-	(state, props) => (
+export default connect(state => ({ state }), dispatch => ({ dispatch }),
+	(stateProps, dispatchProps, ownProps) => (
 		{ 
-			structure: selectors.getStructure(state)
-		}
-	), 
-	dispatch => (
-		{ 
-			actions: bindActionCreators(actions, dispatch)		
-		}
+			...ownProps,  
+			structure: selectors.getStructure(stateProps.state, dispatchProps.dispatch), 
+			actions: bindActionCreators(actions, dispatchProps.dispatch)
+		}	
 	)
 ) (Structure)
